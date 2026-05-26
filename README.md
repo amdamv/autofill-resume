@@ -1,20 +1,55 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Resume AI Generator & Autofill Extension
 
-# Run and deploy your AI Studio app
+AI-powered resume workspace for tailoring CV content to job descriptions, previewing a LaTeX PDF, and downloading the final resume.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/112a4100-8c51-4dd2-a219-7e89f97aa932
+- Claude-powered resume tailoring
+- Editable candidate profile and job description
+- LaTeX Workshop with template/filter selection
+- PDF preview and download
+- Browser extension autofill simulator
+- NestJS backend + React/Vite frontend
 
-## Run Locally
+## Tech Stack
 
-**Prerequisites:**  Node.js
+- React 19, Vite, TypeScript
+- Zustand
+- NestJS
+- Claude API via `@anthropic-ai/sdk`
+- LaTeX PDF rendering via `pdflatex`
 
+## Setup
 
-1. Install dependencies:
-   `npm install`
-2. Set the `ANTHROPIC_API_KEY` in [.env](.env) to your Claude API key
-3. Run the app:
-   `npm run dev`
+```bash
+npm install
+```
+
+Create `.env`:
+
+```env
+ANTHROPIC_API_KEY="your_claude_api_key"
+```
+
+Run locally:
+
+```bash
+npm run dev
+```
+
+Frontend: `http://localhost:5173`  
+Backend: `http://localhost:3001`
+
+## Scripts
+
+```bash
+npm run dev      # start frontend + backend
+npm run build    # production build
+npm run lint     # TypeScript check
+```
+
+## Notes
+
+- Keep API keys only in `.env`.
+- PDF generation requires a local LaTeX installation with `pdflatex`.
+- Default PDF template is the FAANG-style ATS-friendly resume in the LaTeX Workshop.
