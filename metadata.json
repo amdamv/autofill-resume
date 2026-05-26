@@ -1,0 +1,9 @@
+{
+  "name": "Resume AI Generator & Autofill Extension",
+  "description": "An interactive dashboard and simulated browser extension to tailor resumes using Claude AI and autofill job application fields automatically in client forms.",
+  "requestFramePermissions": [
+    "clipboardWrite",
+    "clipboardRead"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_AI_API"]
+}
