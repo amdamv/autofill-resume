@@ -1,46 +1,117 @@
-import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsIn, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CandidateProfileDto } from './generate-resume.dto';
+
+export class PdfCandidateProfileDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skills?: string[];
+
+  @IsOptional()
+  @IsString()
+  experience?: string;
+
+  @IsOptional()
+  @IsString()
+  education?: string;
+
+  @IsOptional()
+  @IsString()
+  linkedin?: string;
+
+  @IsOptional()
+  @IsString()
+  github?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+}
 
 export class TailoredResumePdfDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  id!: string;
+  id?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  jobTitle!: string;
+  jobTitle?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  companyName!: string;
+  companyName?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  tailoredAt!: string;
+  tailoredAt?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  summary!: string;
+  summary?: string;
 
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  highlightedSkills!: string[];
+  highlightedSkills?: string[];
 
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  tailoredBullets!: string[];
+  tailoredBullets?: string[];
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  coverLetter!: string;
+  coverLetter?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsObject({ each: true })
+  experience?: Array<{
+    company?: string;
+    position?: string;
+    dates?: string;
+    location?: string;
+    bullets?: string[];
+  }>;
+
+  @IsOptional()
+  @IsArray()
+  @IsObject({ each: true })
+  projects?: Array<{
+    name?: string;
+    stack?: string;
+    bullets?: string[];
+  }>;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  certificates?: string[];
 }
 
 export class RenderResumeDto {
+  @IsObject()
   @ValidateNested()
-  @Type(() => CandidateProfileDto)
-  profile!: CandidateProfileDto;
+  @Type(() => PdfCandidateProfileDto)
+  profile!: PdfCandidateProfileDto;
 
+  @IsObject()
   @ValidateNested()
   @Type(() => TailoredResumePdfDto)
   resume!: TailoredResumePdfDto;

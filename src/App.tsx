@@ -152,8 +152,11 @@ export default function App() {
                 setProfile({
                   name: "Akhmad Akhmedov",
                   title: "Middle Node.js Backend Developer",
-                  email: "madakhmedov@gmail.com",
-                  phone: "+380669433984",
+                  email: "",
+                  phone: "",
+                  linkedin: "",
+                  github: "",
+                  location: "",
                   skills: ["TypeScript", "JavaScript", "Node.js", "NestJS", "Express", "SQL", "PostgreSQL", "MongoDB", "Redis", "TypeORM", "Kafka", "NATS", "RabbitMQ", "WebSocket", "JWT", "Docker", "Kubernetes", "CI/CD", "AWS", "MinIO", "Git", "GitHub", "Jest", "Swagger", "Postman", "Grafana", "Agile"],
                   experience: "Backend Developer with 4+ years of experience building scalable systems using Node.js, NestJS, PostgreSQL and Kafka. Delivered high-load microservices for scalable, business-critical systems including real-time and data-intensive applications. Skilled in system design, caching, authentication, queues, and DevOps. Strong in clean code, team collaboration, and Agile.",
                   education: "National University of Radio Electronics, Bachelor of Science in Computer Science, Sep. 2018 - Nov. 2022, Kharkiv, Ukraine"

@@ -130,18 +130,23 @@ export class LatexRendererService {
 
   renderTex(dto: RenderResumeDto, options: RenderOptions): string {
     const settings = templateSettings[options.templateId];
-    const profile = dto.profile;
-    const resume = dto.resume;
+    const profile = dto.profile || {};
+    const resume = dto.resume || {};
     const skills = this.prioritizeSkills(
-      [...new Set([...resume.highlightedSkills, ...(profile.skills || [])])],
+      [
+        ...new Set([
+          ...this.cleanArray(resume.highlightedSkills),
+          ...this.cleanArray(profile.skills),
+        ]),
+      ],
       options.filterId,
     );
 
-    const bullets = resume.tailoredBullets.slice(
+    const bullets = this.cleanArray(resume.tailoredBullets).slice(
       0,
       options.templateId === 'compact-ats' ? 5 : 7,
     );
-    const title = resume.jobTitle || profile.title;
+    const title = this.clean(resume.jobTitle) || this.clean(profile.title);
     const experienceSections = this.buildExperienceSections(
       dto,
       bullets,
@@ -150,14 +155,40 @@ export class LatexRendererService {
     const skillGroups = this.groupSkills(skills);
     const projects = this.buildProjects(dto, skills);
     const certificates = this.buildCertificates(dto);
+    const header = this.renderHeader(profile, title);
+    const aboutSection = this.renderAboutSection(resume.summary);
+    const skillsSection = this.renderSkillsSection(skillGroups);
+    const experienceSection = experienceSections.length
+      ? String.raw`\section{Experience}
+  \resumeSubHeadingListStart
+${experienceSections.map((section) => this.renderExperienceSection(section)).join('\n\n')}
+  \resumeSubHeadingListEnd
+\vspace{-10pt}`
+      : '';
+    const projectsSection = projects.length
+      ? String.raw`\section{Projects}
+  \resumeSubHeadingListStart
+${projects.map((project) => this.renderProjectSection(project)).join('\n\n')}
+  \resumeSubHeadingListEnd
+\vspace{-10pt}`
+      : '';
+    const educationSection = this.renderEducationSection(profile.education);
+    const certificatesSection = certificates.length
+      ? String.raw`\section{Certificates}
+\begin{itemize}[leftmargin=0.15in, label={}, itemsep=1pt, topsep=1pt]
+  \small{
+${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certificate)}}\\vspace{-5pt}}`).join('\n')}
+  }
+\end{itemize}`
+      : '';
 
     return String.raw`\documentclass[letterpaper,${settings.fontSize}]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
+\usepackage[letterpaper,margin=0.55in]{geometry}
 \usepackage{latexsym}
-\IfFileExists{fullpage.sty}{\usepackage{fullpage}}{}
 \usepackage{titlesec}
 \usepackage[usenames,dvipsnames]{color}
 \usepackage{verbatim}
@@ -165,6 +196,7 @@ export class LatexRendererService {
 \usepackage[hidelinks]{hyperref}
 \usepackage{fancyhdr}
 \usepackage{fontawesome5}
+\usepackage{microtype}
 \setlength{\columnsep}{-1pt}
 \IfFileExists{glyphtounicode.tex}{\input{glyphtounicode}}{}
 
@@ -174,16 +206,13 @@ export class LatexRendererService {
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
-\addtolength{\oddsidemargin}{-0.6in}
-\addtolength{\evensidemargin}{-0.5in}
-\addtolength{\textwidth}{1.19in}
-\addtolength{\topmargin}{${settings.topMargin}}
-\addtolength{\textheight}{${settings.textHeight}}
-
 \urlstyle{same}
 \raggedbottom
 \raggedright
 \setlength{\tabcolsep}{0in}
+\setlength{\parskip}{0pt}
+\sloppy
+\emergencystretch=2em
 
 \titleformat{\section}{
   \vspace{${settings.sectionSpacing}}\scshape\raggedright\large\bfseries
@@ -224,66 +253,107 @@ export class LatexRendererService {
 
 \begin{document}
 
-\begin{center}
-    {\Huge \scshape ${this.escape(profile.name || 'Name Surname')}} \\ \vspace{2pt}
-    \textbf{${this.escape(title || 'Software Engineer')}} \\ \vspace{3pt}
-    \small
-    \raisebox{-0.2\height}\faPhone\ ${this.escape(profile.phone || '123-456-7890')} ~
-    \href{mailto:${this.safeUrl(profile.email || 'email@example.com')}}{\raisebox{-0.2\height}\faEnvelope\ \underline{${this.escape(profile.email || 'email@example.com')}}} ~
-    \href{${this.safeUrl(this.linkedinUrl(profile.name))}}{\raisebox{-0.2\height}\faLinkedin\ \underline{${this.escape(this.linkedinLabel(profile.name))}}} ~
-    \href{${this.safeUrl(this.githubUrl(profile.name))}}{\raisebox{-0.2\height}\faGithub\ \underline{${this.escape(this.githubLabel(profile.name))}}} ~
-    \raisebox{-0.2\height}\faMapMarker* \ ${this.escape(this.locationFromEducation(profile.education))}
-    \vspace{-8pt}
-\end{center}
-
-\section{About}
-\small{
-${this.escape(resume.summary || 'Software Engineer with experience building scalable, reliable, and maintainable production systems. Strong background in backend services, distributed architecture, cloud infrastructure, API design, and cross-functional delivery. Focused on measurable business impact, clean engineering practices, performance optimization, and high-quality user experiences.')}
-}
-\vspace{-6pt}
-
-\section{Skills}
-\begin{itemize}[leftmargin=0.15in, label={}, itemsep=1pt, topsep=1pt]
-  \small{\item{
-    \textbf{Backend:} ${this.escape(skillGroups.backend.join(', '))} \\
-    \textbf{Frontend:} ${this.escape(skillGroups.frontend.join(', '))} \\
-    \textbf{Databases:} ${this.escape(skillGroups.databases.join(', '))} \\
-    \textbf{DevOps:} ${this.escape(skillGroups.devops.join(', '))} \\
-    \textbf{Cloud:} ${this.escape(skillGroups.cloud.join(', '))} \\
-    \textbf{AI/LLM Tools:} ${this.escape(skillGroups.ai.join(', '))}
-  }}
-\end{itemize}
-\vspace{-14pt}
-
-\section{Experience}
-  \resumeSubHeadingListStart
-${experienceSections.map((section) => this.renderExperienceSection(section)).join('\n\n')}
-  \resumeSubHeadingListEnd
-\vspace{-12pt}
-
-\section{Projects}
-  \resumeSubHeadingListStart
-${projects.map((project) => this.renderProjectSection(project)).join('\n\n')}
-  \resumeSubHeadingListEnd
-\vspace{-12pt}
-
-\section{Education}
-  \resumeSubHeadingListStart
-    \resumeSubheading
-      {${this.escape(this.educationSchool(profile.education))}}{${this.escape(this.educationDates(profile.education))}}
-      {${this.escape(this.educationDegree(profile.education))}}{${this.escape(this.educationLocation(profile.education))}}
-  \resumeSubHeadingListEnd
-\vspace{-10pt}
-
-\section{Certificates}
-\begin{itemize}[leftmargin=0.15in, label={}, itemsep=1pt, topsep=1pt]
-  \small{
-${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certificate)}} -- Issuing Organization \\vspace{-5pt}}`).join('\n')}
-  }
-\end{itemize}
+${header}
+${aboutSection}
+${skillsSection}
+${experienceSection}
+${projectsSection}
+${educationSection}
+${certificatesSection}
 
 \end{document}
 `;
+  }
+
+  private renderHeader(profile: RenderResumeDto['profile'], title: string): string {
+    const name = this.clean(profile.name);
+    const jobTitle = this.clean(title);
+    const contacts = [
+      profile.phone
+        ? String.raw`\raisebox{-0.2\height}\faPhone\ ${this.escape(profile.phone)}`
+        : '',
+      profile.email
+        ? String.raw`\href{mailto:${this.safeUrl(profile.email)}}{\raisebox{-0.2\height}\faEnvelope\ \underline{${this.escape(profile.email)}}}`
+        : '',
+      profile.linkedin
+        ? String.raw`\href{${this.safeUrl(profile.linkedin)}}{\raisebox{-0.2\height}\faLinkedin\ \underline{${this.escape(this.stripProtocol(profile.linkedin))}}}`
+        : '',
+      profile.github
+        ? String.raw`\href{${this.safeUrl(profile.github)}}{\raisebox{-0.2\height}\faGithub\ \underline{${this.escape(this.stripProtocol(profile.github))}}}`
+        : '',
+      profile.location
+        ? String.raw`\raisebox{-0.2\height}\faMapMarker* \ ${this.escape(profile.location)}`
+        : '',
+    ].filter(Boolean);
+
+    if (!name && !jobTitle && !contacts.length) {
+      return '';
+    }
+
+    const contactLines = this.contactLines(contacts)
+      .map((line) => `    ${line.join(' ~ ')}`)
+      .join(' \\\\\n');
+
+    return String.raw`\begin{center}
+${name ? `    {\\Huge \\scshape ${this.escape(name)}} \\\\ \\vspace{2pt}` : ''}
+${jobTitle ? `    \\textbf{${this.escape(jobTitle)}} \\\\ \\vspace{3pt}` : ''}
+${contacts.length ? `    \\small\n${contactLines}` : ''}
+    \vspace{-8pt}
+\end{center}`;
+  }
+
+  private contactLines(contacts: string[]): string[][] {
+    if (contacts.length <= 3) {
+      return [contacts];
+    }
+
+    const splitAt = Math.ceil(contacts.length / 2);
+    return [contacts.slice(0, splitAt), contacts.slice(splitAt)];
+  }
+
+  private renderAboutSection(summary?: string): string {
+    const cleanSummary = this.clean(summary);
+    if (!cleanSummary) return '';
+
+    return String.raw`\section{About}
+\small{${this.escape(cleanSummary)}}
+\vspace{-5pt}`;
+  }
+
+  private renderSkillsSection(skillGroups: ReturnType<LatexRendererService['groupSkills']>): string {
+    const rows = [
+      { label: 'Backend', values: skillGroups.backend },
+      { label: 'Frontend', values: skillGroups.frontend },
+      { label: 'Databases', values: skillGroups.databases },
+      { label: 'DevOps', values: skillGroups.devops },
+      { label: 'Cloud', values: skillGroups.cloud },
+      { label: 'AI/LLM Tools', values: skillGroups.ai },
+    ]
+      .filter((row) => row.values.length)
+      .map((row) => `    \\textbf{${row.label}:} ${this.escape(row.values.join(', '))}`)
+      .join(' \\\\\n');
+
+    if (!rows) return '';
+
+    return String.raw`\section{Skills}
+\begin{itemize}[leftmargin=0.15in, label={}, itemsep=1pt, topsep=1pt]
+  \small{\item{
+${rows}
+  }}
+\end{itemize}
+\vspace{-12pt}`;
+  }
+
+  private renderEducationSection(education?: string): string {
+    if (!this.clean(education)) return '';
+
+    return String.raw`\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {${this.escape(this.educationSchool(education))}}{${this.escape(this.educationDates(education))}}
+      {${this.escape(this.educationDegree(education))}}{${this.escape(this.educationLocation(education))}}
+  \resumeSubHeadingListEnd
+\vspace{-8pt}`;
   }
 
   private prioritizeSkills(
@@ -307,51 +377,37 @@ ${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certifica
     bullets: string[],
     title: string,
   ) {
-    const companyName =
-      dto.resume.companyName && dto.resume.companyName !== 'AI Suggested Target'
-        ? dto.resume.companyName
-        : 'Company 1';
+    const explicitExperience = (dto.resume.experience || [])
+      .map((item) => ({
+        company: this.clean(item.company),
+        dates: this.clean(item.dates),
+        role: this.clean(item.position),
+        location: this.clean(item.location),
+        bullets: this.cleanArray(item.bullets),
+      }))
+      .filter(
+        (item) =>
+          item.company || item.dates || item.role || item.location || item.bullets.length,
+      );
 
-    const normalizedBullets = bullets.length
-      ? bullets
-      : [
-          'Achievement 1.',
-          'Achievement 2.',
-          'Achievement 3.',
-          'Achievement 4.',
-        ];
+    if (explicitExperience.length) {
+      return explicitExperience;
+    }
+
+    const companyName = this.clean(dto.resume.companyName);
+    const normalizedBullets = this.cleanArray(bullets);
+
+    if (!companyName && !title && !normalizedBullets.length) {
+      return [];
+    }
 
     return [
       {
         company: companyName,
-        dates: 'Jan. 2024 -- Present',
-        role: title || 'Full stack Developer',
-        location: this.locationFromEducation(dto.profile.education),
+        dates: '',
+        role: title,
+        location: this.clean(dto.profile.location),
         bullets: normalizedBullets.slice(0, 4),
-      },
-      {
-        company: 'Company 2',
-        dates: 'Jun. 2023 -- May 2024',
-        role: title || 'Full stack Developer',
-        location: this.locationFromEducation(dto.profile.education),
-        bullets: [
-          'Architected and developed scalable backend services, ensuring high availability and fault tolerance.',
-          'Worked closely with the TeamLead to design core system components and choose practical technologies.',
-          'Built secure authentication and authorization flows using JWT tokens.',
-          'Integrated caching solutions to reduce API response times and improve user experience.',
-        ],
-      },
-      {
-        company: 'Company 3',
-        dates: 'Jul. 2022 -- Apr. 2023',
-        role: title || 'Full stack Developer',
-        location: this.locationFromEducation(dto.profile.education),
-        bullets: [
-          'Mentored and onboarded new developers, accelerating their integration and technical growth.',
-          'Developed scalable file upload and storage workflows for production applications.',
-          'Optimized complex SQL queries, improving database performance under high traffic.',
-          'Improved API documentation and testing workflows with Swagger, Postman, and automated checks.',
-        ],
       },
     ];
   }
@@ -363,38 +419,27 @@ ${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certifica
     location: string;
     bullets: string[];
   }): string {
+    const bullets = this.cleanArray(section.bullets);
+    const bulletList = bullets.length
+      ? String.raw`      \resumeItemListStart
+${bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`).join('\n')}
+      \resumeItemListEnd`
+      : '';
+
     return String.raw`    \resumeSubheading
       {${this.escape(section.company)}}{${this.escape(section.dates)}}
       {${this.escape(section.role)}}{${this.escape(section.location)}}
-      \resumeItemListStart
-${section.bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`).join('\n')}
-      \resumeItemListEnd`;
+${bulletList}`;
   }
 
   private buildProjects(dto: RenderResumeDto, skills: string[]) {
-    const primaryStack = skills.slice(0, 4).join(', ') || 'Node.js, PostgreSQL, Redis, Docker';
-    const aiStack = skills.some((skill) => /openai|langchain|llm|vector|rag/i.test(skill))
-      ? skills.filter((skill) => /openai|langchain|llm|vector|rag|ai/i.test(skill)).slice(0, 4).join(', ')
-      : 'OpenAI API, LangChain, Vector Search';
-
-    return [
-      {
-        name: `${dto.resume.jobTitle || dto.profile.title || 'Scalable Job Processing Platform'}`,
-        stack: primaryStack,
-        bullets: [
-          'Built a fault-tolerant platform with retries, rate limiting, and progress tracking for high-volume workloads.',
-          'Improved processing throughput through batching, queue partitioning, and optimized database writes.',
-        ],
-      },
-      {
-        name: 'AI Knowledge Assistant',
-        stack: aiStack,
-        bullets: [
-          'Developed a retrieval-augmented assistant for searching internal documentation with structured answers.',
-          'Reduced average information lookup time through semantic search and reusable prompt templates.',
-        ],
-      },
-    ];
+    return (dto.resume.projects || [])
+      .map((project) => ({
+        name: this.clean(project.name),
+        stack: this.clean(project.stack || skills.slice(0, 4).join(', ')),
+        bullets: this.cleanArray(project.bullets),
+      }))
+      .filter((project) => project.name || project.stack || project.bullets.length);
   }
 
   private renderProjectSection(project: {
@@ -402,14 +447,24 @@ ${section.bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`
     stack: string;
     bullets: string[];
   }): string {
+    const bullets = this.cleanArray(project.bullets);
+    const bulletList = bullets.length
+      ? String.raw`      \resumeItemListStart
+${bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`).join('\n')}
+      \resumeItemListEnd`
+      : '';
+
     return String.raw`    \resumeProjectHeading
       {${this.escape(project.name)}}{${this.escape(project.stack)}}
-      \resumeItemListStart
-${project.bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`).join('\n')}
-      \resumeItemListEnd`;
+${bulletList}`;
   }
 
   private buildCertificates(dto: RenderResumeDto): string[] {
+    const explicitCertificates = this.cleanArray(dto.resume.certificates);
+    if (explicitCertificates.length) {
+      return explicitCertificates;
+    }
+
     const text = `${dto.profile.experience} ${dto.resume.coverLetter}`;
     const matches = text.match(
       /(?:Certificate|Certification|Course)s?:?\s*([^.;\n]+)/i,
@@ -422,7 +477,7 @@ ${project.bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`
         .slice(0, 3);
     }
 
-    return ['Certificate 1', 'Certificate 2', 'Certificate 3'];
+    return [];
   }
 
   private linkedinLabel(name: string): string {
@@ -458,22 +513,22 @@ ${project.bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`
     if (parts.length >= 2) {
       return parts.slice(-2).join(', ');
     }
-    return 'City, Country';
+    return '';
   }
 
   private educationSchool(education?: string): string {
-    return education?.split(',')[0]?.trim() || 'Your State University';
+    return education?.split(',')[0]?.trim() || '';
   }
 
   private educationDegree(education?: string): string {
-    return education?.split(',')[1]?.trim() || 'BSc in Computer Science';
+    return education?.split(',')[1]?.trim() || '';
   }
 
   private educationDates(education?: string): string {
     const match = education?.match(
       /[A-Z][a-z]{2}\.?\s+\d{4}\s*-\s*[A-Z][a-z]{2}\.?\s+\d{4}/,
     );
-    return match?.[0] || 'Sep. 2001 -- June 2006';
+    return match?.[0] || '';
   }
 
   private educationLocation(education?: string): string {
@@ -519,25 +574,29 @@ ${project.bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`
     const ai = has(['OpenAI', 'LangChain', 'LLM', 'AI', 'Vector', 'RAG', 'Prompt']).slice(0, 7);
 
     return {
-      backend: backend.length
-        ? backend
-        : ['Node.js', 'TypeScript', 'REST APIs', 'GraphQL', 'Microservices'],
-      frontend: frontend.length
-        ? frontend
-        : ['React', 'Next.js', 'JavaScript', 'HTML5', 'CSS3', 'Tailwind CSS'],
-      databases: databases.length
-        ? databases
-        : ['PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Query Optimization'],
-      devops: devops.length
-        ? devops
-        : ['Docker', 'Kubernetes', 'CI/CD', 'GitHub Actions', 'Linux', 'Observability'],
-      cloud: cloud.length ? cloud : ['AWS', 'GCP', 'Azure', 'S3', 'Lambda', 'SQS'],
-      ai: ai.length ? ai : ['OpenAI API', 'LangChain', 'Vector Databases', 'RAG'],
+      backend,
+      frontend,
+      databases,
+      devops,
+      cloud,
+      ai,
     };
   }
 
+  private clean(value?: string | null): string {
+    return (value || '').trim();
+  }
+
+  private cleanArray(values?: string[] | null): string[] {
+    return (values || []).map((value) => this.clean(value)).filter(Boolean);
+  }
+
+  private stripProtocol(value: string): string {
+    return value.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  }
+
   private escape(value?: string): string {
-    return (value || '')
+    return this.transliterate(value || '')
       .replace(/\\/g, '\\textbackslash{}')
       .replace(/&/g, '\\&')
       .replace(/%/g, '\\%')
@@ -548,6 +607,45 @@ ${project.bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`
       .replace(/}/g, '\\}')
       .replace(/~/g, '\\textasciitilde{}')
       .replace(/\^/g, '\\textasciicircum{}');
+  }
+
+  private transliterate(value: string): string {
+    const map: Record<string, string> = {
+      'А': 'A', 'а': 'a',
+      'Б': 'B', 'б': 'b',
+      'В': 'V', 'в': 'v',
+      'Г': 'G', 'г': 'g',
+      'Д': 'D', 'д': 'd',
+      'Е': 'E', 'е': 'e',
+      'Ё': 'Yo', 'ё': 'yo',
+      'Ж': 'Zh', 'ж': 'zh',
+      'З': 'Z', 'з': 'z',
+      'И': 'I', 'и': 'i',
+      'Й': 'Y', 'й': 'y',
+      'К': 'K', 'к': 'k',
+      'Л': 'L', 'л': 'l',
+      'М': 'M', 'м': 'm',
+      'Н': 'N', 'н': 'n',
+      'О': 'O', 'о': 'o',
+      'П': 'P', 'п': 'p',
+      'Р': 'R', 'р': 'r',
+      'С': 'S', 'с': 's',
+      'Т': 'T', 'т': 't',
+      'У': 'U', 'у': 'u',
+      'Ф': 'F', 'ф': 'f',
+      'Х': 'Kh', 'х': 'kh',
+      'Ц': 'Ts', 'ц': 'ts',
+      'Ч': 'Ch', 'ч': 'ch',
+      'Ш': 'Sh', 'ш': 'sh',
+      'Щ': 'Shch', 'щ': 'shch',
+      'Ъ': '', 'ъ': '',
+      'Ы': 'Y', 'ы': 'y',
+      'Ь': '', 'ь': '',
+      'Э': 'E', 'э': 'e',
+      'Ю': 'Yu', 'ю': 'yu',
+      'Я': 'Ya', 'я': 'ya',
+    };
+    return value.replace(/[Ѐ-ӿ]/g, (ch) => map[ch] ?? ch);
   }
 
   private safeUrl(value?: string): string {

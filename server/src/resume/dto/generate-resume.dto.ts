@@ -1,5 +1,28 @@
-import { IsNotEmpty, IsString, IsOptional, IsObject, ValidateNested, IsArray } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsObject, ValidateNested, IsArray, IsDefined, ValidateIf } from 'class-validator';
 import { Type } from 'class-transformer';
+
+class ExperienceEntryDto {
+  @IsOptional()
+  @IsString()
+  company?: string;
+
+  @IsOptional()
+  @IsString()
+  position?: string;
+
+  @IsOptional()
+  @IsString()
+  dates?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  bullets?: string[];
+}
 
 export class CandidateProfileDto {
   @IsNotEmpty()
@@ -26,6 +49,12 @@ export class CandidateProfileDto {
   @IsOptional()
   @IsString()
   experience?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ExperienceEntryDto)
+  experienceEntries?: ExperienceEntryDto[];
 
   @IsOptional()
   @IsString()

@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Download,
   Eye,
@@ -31,15 +37,44 @@ export default function ResumePdfWorkshop({
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isRendering, setIsRendering] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
+  const renderRequestId = useRef(0);
+  const pdfUrlRef = useRef<string | null>(null);
 
+  // Cleanup blob URL on unmount
   useEffect(() => {
     return () => {
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+      if (pdfUrlRef.current) URL.revokeObjectURL(pdfUrlRef.current);
     };
-  }, [pdfUrl]);
+  }, []);
+
+  // Clear PDF when activeResume becomes null (resume deleted)
+  useEffect(() => {
+    if (!activeResume) {
+      if (pdfUrlRef.current) URL.revokeObjectURL(pdfUrlRef.current);
+      pdfUrlRef.current = null;
+      setPdfUrl(null);
+    }
+  }, [activeResume]);
+
+  const renderPayload = useMemo(
+    () => ({
+      profile,
+      resume: {
+        ...activeResume,
+        experience:
+          profile.experienceEntries && profile.experienceEntries.length > 0
+            ? profile.experienceEntries
+            : activeResume?.experience,
+      },
+      templateId,
+      filterId,
+    }),
+    [profile, activeResume, templateId, filterId],
+  );
 
   const renderPdf = useCallback(async () => {
     if (!activeResume) return;
+    const requestId = ++renderRequestId.current;
     setIsRendering(true);
     setRenderError(null);
 
@@ -47,12 +82,7 @@ export default function ResumePdfWorkshop({
       const response = await fetch('/api/generate-resume/render-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          profile,
-          resume: activeResume,
-          templateId,
-          filterId,
-        }),
+        body: JSON.stringify(renderPayload),
       });
 
       if (!response.ok) {
@@ -61,30 +91,30 @@ export default function ResumePdfWorkshop({
       }
 
       const blob = await response.blob();
-      const nextUrl = URL.createObjectURL(blob);
-      setPdfUrl((currentUrl) => {
-        if (currentUrl) URL.revokeObjectURL(currentUrl);
-        return nextUrl;
-      });
-      downloadBlob(blob, 'akhmad-akhmedov-resume.pdf');
-    } catch (error: any) {
-      setRenderError(error?.message || 'PDF render failed');
-    } finally {
-      setIsRendering(false);
-    }
-  }, [activeResume, profile, templateId, filterId]);
+      if (requestId !== renderRequestId.current) return;
 
-  const downloadBlob = (blob: Blob, filename: string) => {
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.style.display = 'none';
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    URL.revokeObjectURL(url);
-  };
+      const nextUrl = URL.createObjectURL(
+        new Blob([blob], {
+          type: 'application/pdf',
+        }),
+      );
+      // Keep old URL alive for 2s so iframe can transition without white flash
+      const oldUrl = pdfUrlRef.current;
+      pdfUrlRef.current = nextUrl;
+      setPdfUrl(nextUrl);
+      if (oldUrl) setTimeout(() => URL.revokeObjectURL(oldUrl), 2000);
+    } catch (error: any) {
+      if (requestId === renderRequestId.current) {
+        setRenderError(error?.message || 'PDF render failed');
+      }
+    } finally {
+      if (requestId === renderRequestId.current) {
+        setIsRendering(false);
+      }
+    }
+  }, [activeResume, renderPayload]);
+
+  // PDF рендерится только по кнопке "Собрать PDF"
 
   return (
     <div className="bg-[#101322]/90 border border-cyan-500/20 rounded-2xl p-5 shadow-xl space-y-4">
@@ -96,8 +126,8 @@ export default function ResumePdfWorkshop({
           </h2>
           <p className="text-xs text-slate-400 mt-1">
             {lang === 'ru'
-              ? 'Выбери шаблон/фильтр, собери PDF из LaTeX и скачай готовое резюме.'
-              : 'Choose a template/filter, compile LaTeX, preview and download the final resume.'}
+              ? 'Нажми "Собрать PDF" чтобы скомпилировать. Скачать можно отдельной кнопкой.'
+              : 'Click "Render PDF" to compile. Download stays manual.'}
           </p>
         </div>
 
@@ -197,21 +227,28 @@ export default function ResumePdfWorkshop({
               </a>
             </div>
             <iframe
-              title="Resume PDF preview"
-              src={pdfUrl}
-              className="w-full h-[560px] bg-white"
+              key={pdfUrl}
+              title="Resume PDF Preview"
+              src={pdfUrl ? `${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0` : ''}
+              className="w-full h-[560px] bg-white rounded-xl"
             />
           </div>
         ) : (
           <div className="min-h-[360px] flex flex-col items-center justify-center text-center p-8">
             <FileCode2 size={42} className="text-cyan-500/40 mb-3" />
             <h3 className="text-sm font-bold text-slate-200 mb-1">
-              {lang === 'ru' ? 'PDF пока не собран' : 'PDF is not rendered yet'}
+              {isRendering
+                ? lang === 'ru'
+                  ? 'Собираем PDF...'
+                  : 'Rendering PDF...'
+                : lang === 'ru'
+                  ? 'PDF ещё не собран'
+                  : 'No PDF rendered yet'}
             </h3>
             <p className="text-xs text-slate-500 max-w-md">
               {lang === 'ru'
-                ? 'Нажми “Собрать PDF”, backend скомпилирует LaTeX через pdflatex и покажет результат здесь.'
-                : 'Click Render PDF. The backend compiles LaTeX with pdflatex and shows the result here.'}
+                ? 'Нажми "Собрать PDF", backend скомпилирует LaTeX и покажет результат здесь.'
+                : 'Click "Render PDF". The backend compiles LaTeX and shows the result here.'}
             </p>
           </div>
         )}
