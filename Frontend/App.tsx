@@ -7,6 +7,11 @@ import JobTemplates from './components/templates/JobTemplates';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import { Layers, Puzzle, Bookmark, BookOpen, RefreshCw, Zap } from 'lucide-react';
+import {
+  DEFAULT_LANGUAGE,
+  type LanguageCode,
+} from './i18n/languages';
+import { getTranslations } from './i18n/ui';
 
 export default function App() {
   const savedResumes = useResumeStore((state) => state.savedResumes);
@@ -16,6 +21,8 @@ export default function App() {
 
   // Active Main tab: 'workspace' | 'extension' | 'templates'
   const [activeTab, setActiveTab] = useState<"workspace" | "extension" | "templates">("workspace");
+  const [lang, setLang] = useState<LanguageCode>(DEFAULT_LANGUAGE);
+  const t = getTranslations(lang);
 
   const selectJobTemplate = (job: typeof MOCK_JOBS[0]) => {
     setJobInputs({
@@ -41,7 +48,7 @@ export default function App() {
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-80 h-80 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <Header savedResumesCount={savedResumes.length} />
+      <Header savedResumesCount={savedResumes.length} lang={lang} onSetLang={setLang} />
 
       {/* MAIN NAVIGATION BAR */}
       <div className="bg-[#0b0c13] border-b border-[#181c33] sticky top-0 z-20">
@@ -57,7 +64,7 @@ export default function App() {
               }`}
             >
               <Layers size={14} className={activeTab === 'workspace' ? 'text-emerald-400' : ''} />
-              1. Дашборд резюме и ИИ кастомизация
+              {t.nav.workspace}
             </button>
 
             <button
@@ -69,7 +76,7 @@ export default function App() {
               }`}
             >
               <Puzzle size={14} className={activeTab === 'extension' ? 'text-emerald-400' : ''} />
-              2. Симулятор Браузерного Расширения
+              {t.nav.extension}
               {activeResume && (
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
               )}
@@ -84,14 +91,14 @@ export default function App() {
               }`}
             >
               <Bookmark size={14} className={activeTab === 'templates' ? 'text-emerald-400' : ''} />
-              Шаблоны Вакансий для теста
+              {t.nav.templates}
             </button>
 
           </nav>
 
           <div className="hidden lg:flex items-center gap-2 text-[11px] text-slate-400 bg-[#12162a]/60 border border-[#212749] px-3 py-1.5 rounded-full">
             <Zap size={12} className="text-amber-400 glow-animation" />
-            <span>Выбранная модель: <strong className="text-emerald-300 font-mono">claude-sonnet</strong></span>
+            <span>{t.model.selected} <strong className="text-emerald-300 font-mono">claude-sonnet</strong></span>
           </div>
         </div>
       </div>
@@ -104,9 +111,13 @@ export default function App() {
           <div className="flex items-start gap-3">
             <BookOpen size={18} className="text-emerald-400 mt-0.5" />
             <div className="text-xs">
-              <strong className="text-white block mb-0.5">🚀 Как получить максимальный результат?</strong>
+              <strong className="text-white block mb-0.5">🚀 {t.guide.title}</strong>
               <p className="text-slate-400 leading-relaxed">
-                Заполните ваши данные во вкладке <strong className="text-indigo-300">Дашборд</strong> (или нажмите "Загрузить Демо"), скопируйте нужную вакансию, сгенерируйте адаптированную версию, затем переключитесь во вкладку <strong className="text-emerald-300">Симулятор Расширения</strong> для волшебной авто-заполняемости форм на сайтах!
+                {t.guide.beforeDashboard}{' '}
+                <strong className="text-indigo-300">{t.nav.workspaceShort}</strong>{' '}
+                {t.guide.afterDashboard}{' '}
+                <strong className="text-emerald-300">{t.nav.extensionShort}</strong>{' '}
+                {t.guide.afterExtension}
               </p>
             </div>
           </div>
@@ -134,7 +145,7 @@ export default function App() {
               className="px-3 py-1.5 text-[11px] font-semibold text-slate-300 bg-[#1f2649] hover:bg-[#28315d] rounded-lg transition-all flex items-center gap-1"
             >
               <RefreshCw size={11} />
-              Вернуть профиль из PDF
+              {t.guide.restoreProfile}
             </button>
           </div>
         </div>
@@ -143,7 +154,7 @@ export default function App() {
         <div className="flex-grow min-h-0">
 
           {activeTab === "workspace" && (
-            <ResumeWorkspace />
+            <ResumeWorkspace lang={lang} />
           )}
 
           {activeTab === "extension" && (
@@ -151,14 +162,14 @@ export default function App() {
           )}
 
           {activeTab === "templates" && (
-            <JobTemplates onSelectJob={selectJobTemplate} lang="ru" />
+            <JobTemplates onSelectJob={selectJobTemplate} lang={lang} />
           )}
 
         </div>
 
       </main>
 
-      <Footer />
+      <Footer lang={lang} />
 
     </div>
   );

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useResumeStore } from '../../store/index';
 import { User, Briefcase, Mail, Phone, Github, Linkedin, MapPin, GraduationCap } from 'lucide-react';
 import CompanyManager from './CompanyManager';
+import type { LanguageCode } from '../../i18n/languages';
 
 type Props = {
-  lang: 'ru' | 'en';
+  lang: LanguageCode;
 };
 
 export default function ProfilePanel({ lang }: Props) {

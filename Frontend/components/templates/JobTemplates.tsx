@@ -1,21 +1,25 @@
 import React from 'react';
 import { MOCK_JOBS } from '../../data/mockJobs';
 import { ExternalLink } from 'lucide-react';
+import type { LanguageCode } from '../../i18n/languages';
+import { getTranslations } from '../../i18n/ui';
 
 type Props = {
   onSelectJob: (job: typeof MOCK_JOBS[0]) => void;
-  lang: 'ru' | 'en';
+  lang: LanguageCode;
 };
 
 export default function JobTemplates({ onSelectJob, lang }: Props) {
+  const t = getTranslations(lang);
+
   return (
     <div className="space-y-6">
       <div className="border-b border-[#21274c] pb-2">
         <h2 className="text-lg font-semibold font-display text-white">
-          📂 Выберите подходящий шаблон вакансии для быстрой проверки ИИ
+          📂 {t.templates.title}
         </h2>
         <p className="text-xs text-slate-400">
-          Кликните на кнопку "Адаптировать эту вакансию", чтобы мгновенно подгрузить её описание в генератор резюме и настроить под целевого работодателя.
+          {t.templates.description}
         </p>
       </div>
 
@@ -49,7 +53,7 @@ export default function JobTemplates({ onSelectJob, lang }: Props) {
               onClick={() => onSelectJob(job)}
               className="w-full py-2 bg-gradient-to-r from-emerald-500/10 to-indigo-500/10 hover:from-emerald-500/20 hover:to-indigo-500/20 border border-emerald-500/20 text-emerald-400 hover:text-emerald-300 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1"
             >
-              <span>Адаптировать эту вакансию</span>
+              <span>{t.templates.apply}</span>
               <ExternalLink size={12} />
             </button>
           </div>

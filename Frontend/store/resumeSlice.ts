@@ -3,6 +3,10 @@ import type { TailoredResume, ExperienceEntry } from '../types/index';
 import type { StoreState } from './index';
 import { generateResume } from '../services/resume';
 import { MOCK_JOBS } from '../data/mockJobs';
+import {
+  getLanguageConfig,
+  type LanguageCode,
+} from '../i18n/languages';
 
 const initialDemoResume: TailoredResume = {
   id: 'demo-res-1',
@@ -55,7 +59,7 @@ export interface ResumeSlice {
     targetRole?: string;
   }) => void;
 
-  generateTailoredResume: (lang: 'ru' | 'en') => Promise<void>;
+  generateTailoredResume: (lang: LanguageCode) => Promise<void>;
 }
 
 export const createResumeSlice: StateCreator<StoreState, [], [], ResumeSlice> = (set, get) => ({
@@ -223,7 +227,7 @@ export const createResumeSlice: StateCreator<StoreState, [], [], ResumeSlice> = 
         id: 'res-' + Date.now(),
         jobTitle: targetRole || profile.title,
         companyName: targetCompany || 'AI Suggested Target',
-        tailoredAt: new Date().toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US', {
+        tailoredAt: new Date().toLocaleString(getLanguageConfig(lang).locale, {
           hour: '2-digit',
           minute: '2-digit',
           second: '2-digit',

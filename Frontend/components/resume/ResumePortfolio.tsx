@@ -11,8 +11,9 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useResumeStore } from '../../store/index';
 import CopyButton from '../shared/CopyButton';
+import type { LanguageCode } from '../../i18n/languages';
 
-type Props = { lang: 'ru' | 'en' };
+type Props = { lang: LanguageCode };
 
 export default function ResumePortfolio({ lang }: Props) {
   const profile = useResumeStore((s) => s.profile);

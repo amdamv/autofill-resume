@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
 import type { Tool, ToolUseBlock } from '@anthropic-ai/sdk/resources/messages';
 import { GenerateResumeDto } from './dto/generate-resume.dto';
+import { getResumeTargetLanguageName } from './languages';
 
 type ExperienceEntry = {
   company: string;
@@ -180,6 +181,7 @@ export class ResumeService {
     };
 
     const sanitizedJobDescription = sanitizeInput(jobDescription, 8000);
+    const targetLanguageName = getResumeTargetLanguageName(targetLanguage);
 
     const prompt = `
 You are an elite career development AI coach and expert resume writer.
@@ -201,7 +203,7 @@ Target Job Description:
 ${sanitizedJobDescription}
 """
 
-Target Language: ${targetLanguage === 'en' ? 'English' : 'Russian'}
+Target Language: ${targetLanguageName}
 
 Instructions:
 1. Translate and write ALL fields in the response schema using the target language above.

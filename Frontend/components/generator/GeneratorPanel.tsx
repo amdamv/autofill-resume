@@ -1,13 +1,13 @@
 import React from 'react';
 import { useResumeStore } from '../../store/index';
 import { Sparkles, AlertCircle } from 'lucide-react';
+import type { LanguageCode } from '../../i18n/languages';
 
 type Props = {
-  lang: 'ru' | 'en';
-  onSetLang?: (lang: 'ru' | 'en') => void;
+  lang: LanguageCode;
 };
 
-export default function GeneratorPanel({ lang, onSetLang }: Props) {
+export default function GeneratorPanel({ lang }: Props) {
   const {
     jobDescription,
     targetCompany,
@@ -62,28 +62,6 @@ export default function GeneratorPanel({ lang, onSetLang }: Props) {
                 ? 'Описание Вакансии (Job Description)'
                 : 'Job Description (Copy Paste Here)'}
             </label>
-            <div className="flex gap-1">
-              <button
-                onClick={() => onSetLang?.('ru')}
-                className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
-                  lang === 'ru'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                    : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                RU
-              </button>
-              <button
-                onClick={() => onSetLang?.('en')}
-                className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
-                  lang === 'en'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                    : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                EN
-              </button>
-            </div>
           </div>
           <textarea
             value={jobDescription}
