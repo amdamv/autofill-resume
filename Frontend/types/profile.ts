@@ -19,24 +19,3 @@ export interface CandidateProfile {
   education: string;
   experienceEntries?: ExperienceEntry[];
 }
-
-export interface TailoredResume {
-  id: string;
-  jobTitle: string;
-  companyName: string;
-  tailoredAt: string;
-  summary: string;
-  highlightedSkills: string[];
-  tailoredBullets: string[];
-  coverLetter: string;
-  experience?: ExperienceEntry[];
-}
-
-export interface MockJobPosting {
-  id: string;
-  company: string;
-  role: string;
-  location: string;
-  salary: string;
-  description: string;
-}

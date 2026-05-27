@@ -377,7 +377,7 @@ ${rows}
     bullets: string[],
     title: string,
   ) {
-    const explicitExperience = (dto.resume.experience || [])
+    const explicitExperience = ((dto.resume || {}).experience || [])
       .map((item) => ({
         company: this.clean(item.company),
         dates: this.clean(item.dates),
@@ -394,7 +394,7 @@ ${rows}
       return explicitExperience;
     }
 
-    const companyName = this.clean(dto.resume.companyName);
+    const companyName = this.clean((dto.resume || {}).companyName);
     const normalizedBullets = this.cleanArray(bullets);
 
     if (!companyName && !title && !normalizedBullets.length) {
@@ -406,7 +406,7 @@ ${rows}
         company: companyName,
         dates: '',
         role: title,
-        location: this.clean(dto.profile.location),
+        location: this.clean((dto.profile || {}).location),
         bullets: normalizedBullets.slice(0, 4),
       },
     ];
@@ -433,7 +433,7 @@ ${bulletList}`;
   }
 
   private buildProjects(dto: RenderResumeDto, skills: string[]) {
-    return (dto.resume.projects || [])
+    return ((dto.resume || {}).projects || [])
       .map((project) => ({
         name: this.clean(project.name),
         stack: this.clean(project.stack || skills.slice(0, 4).join(', ')),
@@ -460,12 +460,12 @@ ${bulletList}`;
   }
 
   private buildCertificates(dto: RenderResumeDto): string[] {
-    const explicitCertificates = this.cleanArray(dto.resume.certificates);
+    const explicitCertificates = this.cleanArray((dto.resume || {}).certificates);
     if (explicitCertificates.length) {
       return explicitCertificates;
     }
 
-    const text = `${dto.profile.experience} ${dto.resume.coverLetter}`;
+    const text = `${(dto.profile || {}).experience || ''} ${(dto.resume || {}).coverLetter || ''}`;
     const matches = text.match(
       /(?:Certificate|Certification|Course)s?:?\s*([^.;\n]+)/i,
     );

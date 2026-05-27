@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useResumeStore } from "../store/useResumeStore";
-import { MOCK_JOBS } from "../data/mockJobs";
-import { 
-  Puzzle, MousePointer, Sparkles, Wand2, Copy, Check, Info, FileText, 
+import { useResumeStore } from "../../store/index";
+import { MOCK_JOBS } from "../../data/mockJobs";
+import {
+  Puzzle, MousePointer, Sparkles, Wand2, Copy, Check, Info, FileText,
   User, Mail, ShieldAlert, Plus, Trash2, Globe, FileCode, CheckCircle2, ChevronRight, RefreshCw, Landmark, ExternalLink
 } from "lucide-react";
 
@@ -53,10 +53,10 @@ export default function ExtensionSimulator() {
 
   return (
     <div className="h-full flex flex-col xl:flex-row gap-6 pb-12">
-      
+
       {/* LEFT PORTION: THE SIMULATED HIRING WEB PORTAL (HH.RU MOCKUP) */}
       <div className="flex-grow xl:w-2/3 bg-[#0d0e14] border border-[#20253f] rounded-2xl overflow-hidden flex flex-col shadow-2xl">
-        
+
         {/* Browser Mockbar Header */}
         <div className="bg-[#121421] px-4 py-3 border-b border-[#20253f]/75 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -101,7 +101,7 @@ export default function ExtensionSimulator() {
 
         {/* Page Inner Container (Divided into Vacancy Details & Candidate Apply Form) */}
         <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#20253f] flex-grow overflow-y-auto">
-          
+
           {/* Visual Vacancy Description left sub column */}
           <div className="p-6 space-y-4 bg-[#090b14]/40">
             <div className="border-b border-[#1f2545] pb-3">
@@ -156,7 +156,7 @@ export default function ExtensionSimulator() {
             </div>
 
             <div className="space-y-3.5 text-xs">
-              
+
               {/* Name field */}
               <div>
                 <label className="text-slate-400 font-medium block mb-1">
@@ -325,7 +325,7 @@ export default function ExtensionSimulator() {
 
       {/* RIGHT PORTION: JOBFILL BROWSER EXTENSION INTERACTIVE FLOATING POPUP */}
       <div className="xl:w-80 bg-[#14172a] border-2 border-indigo-500/30 rounded-2xl flex flex-col overflow-hidden shadow-2xl shrink-0">
-        
+
         {/* Extension Banner top brand */}
         <div className="bg-[#0b0d19] px-4 py-3 border-b border-[#232849] flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -373,11 +373,11 @@ export default function ExtensionSimulator() {
 
         {/* Extension Inner Panel scroll view */}
         <div className="p-4 flex-grow overflow-y-auto space-y-4">
-          
+
           {/* SECTION A: THE CORE 1-CLICK SCAN & PASTE HUB */}
           {activeExtensionSection === "fill" && (
             <div className="space-y-4">
-              
+
               {/* Core trigger block */}
               <div className="bg-[#0c0d15] rounded-xl border border-indigo-500/20 p-3 text-center space-y-2.5">
                 <div>
@@ -411,7 +411,7 @@ export default function ExtensionSimulator() {
               {/* Display Tailored outputs once ready */}
               {scannedResume ? (
                 <div className="space-y-3">
-                  
+
                   {/* Outreach notification / Intro Message ready badge */}
                   <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 space-y-2">
                     <div className="flex items-center justify-between">
@@ -420,7 +420,7 @@ export default function ExtensionSimulator() {
                       </span>
                       <span className="text-[9px] text-slate-500 font-mono">1 клик</span>
                     </div>
-                    
+
                     <div>
                       <span className="text-[9px] text-[#8e95b3] font-semibold block">О себе:</span>
                       <p className="text-[10px] text-slate-300 leading-normal line-clamp-2 bg-[#08090f]/60 p-1.5 rounded border border-[#232849]/50 italic">
@@ -456,7 +456,7 @@ export default function ExtensionSimulator() {
                       <Wand2 size={13} className="text-slate-950 glow-animation animate-bounce" />
                       {isInjecting ? "Вставляем ячейки..." : "Вставить во все поля формы (JobFill)"}
                     </button>
-                    
+
                     {injectStep && (
                       <div className="bg-[#0b0c15] border border-emerald-500/20 p-2 rounded-lg text-center text-[10px] font-mono text-emerald-400 animate-pulse">
                         {injectStep}
@@ -502,7 +502,7 @@ export default function ExtensionSimulator() {
           {/* SECTION B: REPLENISH PERSONAL DATA (Пополнить свои данные) */}
           {activeExtensionSection === "my-data" && (
             <div className="space-y-4">
-              
+
               <div className="bg-gradient-to-tr from-[#111425] to-[#12162a] p-3 rounded-xl border border-indigo-500/10">
                 <h4 className="text-[11px] font-bold text-emerald-400 mb-1 flex items-center gap-1">
                   <CheckCircle2 size={12} />
@@ -518,7 +518,7 @@ export default function ExtensionSimulator() {
                 <span className="text-[10px] font-bold text-indigo-300 uppercase block mb-1">
                   ⊕ Добавить новое поле данных:
                 </span>
-                
+
                 <div className="space-y-2 text-xs">
                   <div>
                     <label className="text-[10px] text-slate-500 block mb-0.5">Ключ поля (ID латиницей, например github, notice)</label>

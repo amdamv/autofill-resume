@@ -12,13 +12,13 @@ import {
   Loader2,
   SlidersHorizontal,
 } from 'lucide-react';
-import { CandidateProfile, TailoredResume } from '../types';
+import { CandidateProfile, TailoredResume } from '../../types/index';
 import {
   RESUME_FILTERS,
   RESUME_TEMPLATES,
   ResumeFilterId,
   ResumeTemplateId,
-} from './options';
+} from './PdfOptions';
 
 type Props = {
   profile: CandidateProfile;

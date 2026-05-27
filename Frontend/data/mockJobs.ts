@@ -1,4 +1,4 @@
-import { MockJobPosting } from "../types";
+import type { MockJobPosting } from '../types/resume';
 
 export const MOCK_JOBS: MockJobPosting[] = [
   {
