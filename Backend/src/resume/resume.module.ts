@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ResumeController } from './resume.controller';
 import { ResumeService } from './resume.service';
-import { LatexRendererService } from './latex/latex-renderer.service';
+import { LatexRendererService } from './latex/renderer/latex-renderer.service';
 
 @Module({
   controllers: [ResumeController],

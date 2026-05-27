@@ -13,7 +13,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { ResumeService } from './resume.service';
 import { GenerateResumeDto } from './dto/generate-resume.dto';
 import { RenderResumeDto } from './dto/render-resume.dto';
-import { LatexRendererService } from './latex/latex-renderer.service';
+import { LatexRendererService } from './latex/renderer/latex-renderer.service';
 
 @Controller('generate-resume')
 export class ResumeController {

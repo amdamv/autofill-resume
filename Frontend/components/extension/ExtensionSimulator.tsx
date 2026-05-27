@@ -645,7 +645,7 @@ export default function ExtensionSimulator() {
                       type="text"
                       value={newFieldValue}
                       onChange={(e) => setNewFieldValue(e.target.value)}
-                      placeholder="https://t.me/alex_webdev"
+                      placeholder="https://t.me/amdamv"
                       className="w-full bg-[#07080d] border border-[#2b325c] rounded px-2.5 py-1 text-[11px] text-emerald-300 font-mono"
                     />
                   </div>
