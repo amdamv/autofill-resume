@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, BadRequestException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  BadRequestException,
+  Inject,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
 import type { Tool, ToolUseBlock } from '@anthropic-ai/sdk/resources/messages';
@@ -20,6 +25,17 @@ type TailoredResume = {
   experienceEntries?: ExperienceEntry[];
 };
 
+const sanitizeInput = (value: unknown, maxLength = 4000): string => {
+  if (typeof value !== 'string') {
+    return 'N/A';
+  }
+
+  return value
+    .slice(0, maxLength)
+    .replace(/[{}<>]/g, '')
+    .trim();
+};
+
 const tailoredResumeSchema: Tool.InputSchema = {
   type: 'object',
   additionalProperties: false,
@@ -32,7 +48,8 @@ const tailoredResumeSchema: Tool.InputSchema = {
     highlightedSkills: {
       type: 'array',
       items: { type: 'string' },
-      description: 'List of exactly 8 key skills matching this job posting, ranked by relevance.',
+      description:
+        'List of exactly 8 key skills matching this job posting, ranked by relevance.',
     },
     tailoredBullets: {
       type: 'array',
@@ -47,7 +64,8 @@ const tailoredResumeSchema: Tool.InputSchema = {
     },
     experienceEntries: {
       type: 'array',
-      description: 'Optional: improved version of the candidate\'s work experience entries with polished bullets tailored to the job. Keep the same companies and positions, just improve the bullet wording and add relevant tech stack keywords.',
+      description:
+        "Optional: improved version of the candidate's work experience entries with polished bullets tailored to the job. Keep the same companies and positions, just improve the bullet wording and add relevant tech stack keywords.",
       items: {
         type: 'object',
         additionalProperties: false,
@@ -59,7 +77,8 @@ const tailoredResumeSchema: Tool.InputSchema = {
           bullets: {
             type: 'array',
             items: { type: 'string' },
-            description: 'Improved achievement bullets for this role. Keep realistic — don\'t fabricate fake metrics, but improve wording and add relevant tech keywords from the job posting.',
+            description:
+              "Improved achievement bullets for this role. Keep realistic — don't fabricate fake metrics, but improve wording and add relevant tech keywords from the job posting.",
           },
         },
         required: ['company', 'position', 'dates', 'location', 'bullets'],
@@ -89,7 +108,9 @@ export class ResumeService {
   }
 
   private toTailoredResume(value: unknown): TailoredResume {
-    const parsed = (typeof value === 'string' ? JSON.parse(value) : value) as Partial<TailoredResume> & {
+    const parsed = (
+      typeof value === 'string' ? JSON.parse(value) : value
+    ) as Partial<TailoredResume> & {
       tailored_resume?: Partial<TailoredResume>;
     };
     const payload = parsed.tailored_resume || parsed;
@@ -102,14 +123,16 @@ export class ResumeService {
       typeof payload.coverLetter === 'string';
 
     if (!isValid) {
-      throw new InternalServerErrorException('Claude returned an invalid resume payload');
+      throw new InternalServerErrorException(
+        'Claude returned an invalid resume payload',
+      );
     }
 
     const result: TailoredResume = {
-      summary: payload.summary,
-      highlightedSkills: payload.highlightedSkills,
-      tailoredBullets: payload.tailoredBullets,
-      coverLetter: payload.coverLetter,
+      summary: payload.summary as string,
+      highlightedSkills: payload.highlightedSkills as string[],
+      tailoredBullets: payload.tailoredBullets as string[],
+      coverLetter: payload.coverLetter as string,
     };
 
     if (Array.isArray(payload.experienceEntries)) {
@@ -119,41 +142,63 @@ export class ResumeService {
     return result;
   }
 
-  async generateTailoredResume(dto: GenerateResumeDto): Promise<TailoredResume> {
+  async generateTailoredResume(
+    dto: GenerateResumeDto,
+  ): Promise<TailoredResume> {
     const { profile, jobDescription, targetLanguage = 'ru' } = dto;
     const ai = this.getAiClient();
-    const model = this.configService.get<string>('anthropicModel') || 'claude-sonnet-4-5-20250929';
+    const model =
+      this.configService.get<string>('anthropicModel') ||
+      'claude-sonnet-4-5-20250929';
 
-    const skillsStr = Array.isArray(profile.skills) ? profile.skills.join(', ') : 'N/A';
+    const skillsStr = Array.isArray(profile.skills)
+      ? profile.skills.map((skill) => sanitizeInput(skill, 100)).join(', ')
+      : 'N/A';
 
     const experienceEntriesStr =
-      Array.isArray(profile.experienceEntries) && profile.experienceEntries.length > 0
+      Array.isArray(profile.experienceEntries) &&
+      profile.experienceEntries.length > 0
         ? profile.experienceEntries
             .map(
               (e) =>
-                `- ${e.position || 'N/A'} at ${e.company || 'N/A'} (${e.dates || 'N/A'}, ${e.location || 'N/A'})\n  Achievements:\n    ${(e.bullets || []).map((b) => `• ${b}`).join('\n    ')}`,
+                `- ${sanitizeInput(e.position, 120)} at ${sanitizeInput(e.company, 120)} (${sanitizeInput(e.dates, 80)}, ${sanitizeInput(e.location, 120)})\n  Achievements:\n    ${(
+                  e.bullets || []
+                )
+                  .map((b) => `• ${sanitizeInput(b, 300)}`)
+                  .join('\n    ')}`,
             )
             .join('\n')
         : 'N/A';
+
+    const sanitizedProfile = {
+      name: sanitizeInput(profile.name, 120),
+      title: sanitizeInput(profile.title, 120),
+      email: sanitizeInput(profile.email, 120),
+      phone: sanitizeInput(profile.phone, 40),
+      experience: sanitizeInput(profile.experience, 3000),
+      education: sanitizeInput(profile.education, 1500),
+    };
+
+    const sanitizedJobDescription = sanitizeInput(jobDescription, 8000);
 
     const prompt = `
 You are an elite career development AI coach and expert resume writer.
 Your goal is to perfectly tailor the candidate's profile to align with the provided Target Job Description.
 
 Candidate Profile Information:
-- Full Name: ${profile.name || 'N/A'}
-- Professional Title: ${profile.title || 'N/A'}
-- Contact Email: ${profile.email || 'N/A'}
-- Contact Phone: ${profile.phone || 'N/A'}
+- Full Name: ${sanitizedProfile.name}
+- Professional Title: ${sanitizedProfile.title}
+- Contact Email: ${sanitizedProfile.email}
+- Contact Phone: ${sanitizedProfile.phone}
 - Core Skills: ${skillsStr}
-- Working Experience Summary: ${profile.experience || 'N/A'}
+- Working Experience Summary: ${sanitizedProfile.experience}
 - Work History (Companies):
 ${experienceEntriesStr}
-- Education Information: ${profile.education || 'N/A'}
+- Education Information: ${sanitizedProfile.education}
 
 Target Job Description:
 """
-${jobDescription}
+${sanitizedJobDescription}
 """
 
 Target Language: ${targetLanguage === 'en' ? 'English' : 'Russian'}
@@ -185,7 +230,7 @@ Instructions:
     try {
       const response = await ai.messages.create({
         model,
-        max_tokens: 2000,
+        max_tokens: 1500,
         thinking: { type: 'disabled' },
         system:
           'Use the format_tailored_resume tool exactly once with the finished tailored resume. Do not add commentary.',
@@ -193,7 +238,8 @@ Instructions:
         tools: [
           {
             name: 'format_tailored_resume',
-            description: 'Return the tailored resume content in the exact schema required by the app.',
+            description:
+              'Return the tailored resume content in the exact schema required by the app.',
             input_schema: tailoredResumeSchema,
           },
         ],
@@ -220,14 +266,17 @@ Instructions:
         .trim();
 
       if (!text) {
-        throw new InternalServerErrorException('No structured response received from Claude');
+        throw new InternalServerErrorException(
+          'No structured response received from Claude',
+        );
       }
 
       return this.toTailoredResume(text);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating tailored resume:', error);
+
       throw new InternalServerErrorException(
-        error?.message || 'Internal server error during resume tailoring',
+        'Internal server error during resume tailoring',
       );
     }
   }

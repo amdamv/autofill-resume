@@ -36,9 +36,7 @@ export default function GeneratorPanel({ lang, onSetLang }: Props) {
             <input
               type="text"
               value={targetCompany}
-              onChange={(e) =>
-                setJobInputs({ targetCompany: e.target.value })
-              }
+              onChange={(e) => setJobInputs({ targetCompany: e.target.value })}
               placeholder="SberTech, Yandex, etc."
               className="w-full px-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
             />
@@ -51,7 +49,7 @@ export default function GeneratorPanel({ lang, onSetLang }: Props) {
               type="text"
               value={targetRole}
               onChange={(e) => setJobInputs({ targetRole: e.target.value })}
-              placeholder="Senior React Developer"
+              placeholder="Senior Backend Developer"
               className="w-full px-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
             />
           </div>
@@ -89,9 +87,7 @@ export default function GeneratorPanel({ lang, onSetLang }: Props) {
           </div>
           <textarea
             value={jobDescription}
-            onChange={(e) =>
-              setJobInputs({ jobDescription: e.target.value })
-            }
+            onChange={(e) => setJobInputs({ jobDescription: e.target.value })}
             placeholder={
               lang === 'ru'
                 ? 'Вставьте текст описания вакансии или выберите из шаблонов справа...'

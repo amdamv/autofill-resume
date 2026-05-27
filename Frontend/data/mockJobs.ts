@@ -2,63 +2,70 @@ import type { MockJobPosting } from '../types/resume';
 
 export const MOCK_JOBS: MockJobPosting[] = [
   {
-    id: "job-1",
-    company: "SberTech",
-    role: "Senior React Developer",
-    location: "Moscow, Russia (Remote/Hybrid)",
-    salary: "280,000 - 360,000 ₽",
-    description: `Ищем Frontend разработчика на продукт облачной платформы.
+    id: 'job-1',
+    company: 'Stripe',
+    role: 'Senior Frontend Engineer',
+    location: 'San Francisco, CA (Remote/Hybrid)',
+    salary: '$170,000 - $220,000',
+    description: `We are looking for a Senior Frontend Engineer to join our cloud infrastructure platform team.
 
-Требования:
-- Опыт коммерческой разработки на React/TypeScript от 4 лет
-- Глубокие знания JavaScript ES6+, HTML5, CSS3, CSS-in-JS или Tailwind CSS
-- Опыт оптимизации производительности веб-приложений (Core Web Vitals)
-- Понимание принципов чистой архитектуры и модульной структуры кода
-- Будет плюсом: Опыт работы с WebSockets, Canvas или библиотеками интерактивных графиков (например, D3.js)
-- Опыт написания unit и e2e тестов Jest/Playwright
+Responsibilities:
+- Build scalable dashboard interfaces using React and TypeScript
+- Improve application performance and optimize Core Web Vitals
+- Refactor legacy frontend modules into modern reusable architecture
+- Collaborate closely with product managers, designers, and backend engineers
+- Write maintainable, tested, and well-documented code
 
-Обязанности:
-- Разработка нового функционала дашбордов управления ресурсами
-- Повышение производительности приложения и рефакторинг легаси-кода
-- Взаимодействие с системными аналитиками и UX/UI дизайнерами`
+Requirements:
+- 4+ years of commercial experience with React and TypeScript
+- Strong knowledge of JavaScript ES6+, HTML5, CSS3, and Tailwind CSS
+- Experience optimizing large-scale web applications
+- Understanding of clean architecture and modular frontend design
+- Experience with Jest, Playwright, or Cypress testing tools
+- Nice to have: Experience with WebSockets, Canvas, or D3.js`,
   },
   {
-    id: "job-2",
-    company: "Yandex Cloud",
-    role: "Middle Full-Stack Engineer (Node.js/React)",
-    location: "Saint Petersburg, Russia",
-    salary: "220,000 - 290,000 ₽",
-    description: `Мы расширяем команду платформы интерактивного анализа данных и ищем талантливого разработчика.
+    id: 'job-2',
+    company: 'Netflix',
+    role: 'Full-Stack Engineer (Node.js/React)',
+    location: 'Los Angeles, CA (Remote)',
+    salary: '$145,000 - $195,000',
+    description: `We are expanding our internal analytics platform team and looking for a Full-Stack Engineer passionate about scalable systems.
 
-Обязанности:
-- Проектирование и разработка клиентской части на React/TypeScript
-- Создание высокопроизводительных микросервисов на Express/Node.js
-- Оптимизация API запросов и кэширование данных
-- Участие в код-ревью и архитектурном планировании проекта
+Responsibilities:
+- Develop responsive frontend applications with React and TypeScript
+- Build and maintain backend microservices using Node.js and Express
+- Design performant APIs and caching strategies
+- Participate in architecture discussions and code reviews
+- Improve developer experience and engineering standards
 
-Требования:
-- Уверенное владение Node.js и экосистемой React
-- Опыт работы с реляционными СУБД (PostgreSQL/MySQL) и NoSQL решениями
-- Отличное знание REST API, HTTP протокола и CORS требований
-- Умение писать лаконичный, документированный и модульный код`
+Requirements:
+- Strong experience with Node.js and React ecosystem
+- Experience with PostgreSQL, MySQL, or NoSQL databases
+- Solid understanding of REST APIs, HTTP protocols, and authentication flows
+- Experience building scalable production systems
+- Ability to write clean, maintainable, and modular code`,
   },
   {
-    id: "job-3",
-    company: "T-Bank (Tinkoff)",
-    role: "Senior Product Designer",
-    location: "Remote (EU/CIS)",
-    salary: "240,000 - 310,000 ₽",
-    description: `Ищем лид-дизайнера для развития экосистемного продукта и расширения его возможностей.
+    id: 'job-3',
+    company: 'Airbnb',
+    role: 'Senior Product Designer',
+    location: 'New York, NY (Hybrid)',
+    salary: '$150,000 - $190,000',
+    description: `We are looking for a Senior Product Designer to help shape the future of our platform experience.
 
-Что нужно делать:
-- Проектировать логику взаимодействия в сложных интерфейсах (B2B личные кабинеты)
-- Запускать исследования (UX-тесты, интервью, коридорки)
-- Создавать интерактивные адаптивные прототипы в Figma и тестировать гипотезы
-- Следить за развитием дизайн-системы, готовить макеты к разработке
+Responsibilities:
+- Design intuitive user experiences for complex B2B and consumer products
+- Conduct UX research, usability testing, and user interviews
+- Create high-fidelity prototypes and interactive flows in Figma
+- Collaborate closely with engineers and product managers
+- Contribute to the growth of the design system and accessibility standards
 
-Кого мы ищем:
-- Портфолио со сложными интерфейсами обязательное
-- Понимание фронтенд ограничений, умение общаться с разработчиками на одном языке
-- Способность обосновывать свои решения с точки зрения пользовательских метрик и бизнес-показателей`
-  }
+Requirements:
+- Strong portfolio with complex product design case studies
+- Deep understanding of UX principles and interaction design
+- Ability to communicate design decisions using user and business metrics
+- Experience working closely with frontend engineering teams
+- Experience designing scalable multi-platform products`,
+  },
 ];

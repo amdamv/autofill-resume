@@ -39,18 +39,32 @@ export default function ResumePdfWorkshop({
   const [renderError, setRenderError] = useState<string | null>(null);
   const renderRequestId = useRef(0);
   const pdfUrlRef = useRef<string | null>(null);
+  const revokeTimeoutRef = useRef<number | null>(null);
 
   // Cleanup blob URL on unmount
   useEffect(() => {
     return () => {
-      if (pdfUrlRef.current) URL.revokeObjectURL(pdfUrlRef.current);
+      if (revokeTimeoutRef.current) {
+        clearTimeout(revokeTimeoutRef.current);
+      }
+
+      if (pdfUrlRef.current) {
+        URL.revokeObjectURL(pdfUrlRef.current);
+      }
     };
   }, []);
 
   // Clear PDF when activeResume becomes null (resume deleted)
   useEffect(() => {
     if (!activeResume) {
-      if (pdfUrlRef.current) URL.revokeObjectURL(pdfUrlRef.current);
+      if (revokeTimeoutRef.current) {
+        clearTimeout(revokeTimeoutRef.current);
+      }
+
+      if (pdfUrlRef.current) {
+        URL.revokeObjectURL(pdfUrlRef.current);
+      }
+
       pdfUrlRef.current = null;
       setPdfUrl(null);
     }
@@ -100,12 +114,24 @@ export default function ResumePdfWorkshop({
       );
       // Keep old URL alive for 2s so iframe can transition without white flash
       const oldUrl = pdfUrlRef.current;
+
       pdfUrlRef.current = nextUrl;
       setPdfUrl(nextUrl);
-      if (oldUrl) setTimeout(() => URL.revokeObjectURL(oldUrl), 2000);
-    } catch (error: any) {
+
+      if (oldUrl) {
+        if (revokeTimeoutRef.current) {
+          clearTimeout(revokeTimeoutRef.current);
+        }
+
+        revokeTimeoutRef.current = window.setTimeout(() => {
+          URL.revokeObjectURL(oldUrl);
+        }, 2000);
+      }
+    } catch (error: unknown) {
       if (requestId === renderRequestId.current) {
-        setRenderError(error?.message || 'PDF render failed');
+        setRenderError(
+          error instanceof Error ? error.message : 'PDF render failed',
+        );
       }
     } finally {
       if (requestId === renderRequestId.current) {
@@ -126,8 +152,8 @@ export default function ResumePdfWorkshop({
           </h2>
           <p className="text-xs text-slate-400 mt-1">
             {lang === 'ru'
-              ? 'Нажми "Собрать PDF" чтобы скомпилировать. Скачать можно отдельной кнопкой.'
-              : 'Click "Render PDF" to compile. Download stays manual.'}
+              ? 'Нажми "Собрать PDF" чтобы скомпилировать и посмотреть PDF прямо в браузере.'
+              : 'Click "Render PDF" to compile and preview PDF directly in browser.'}
           </p>
         </div>
 
@@ -220,17 +246,22 @@ export default function ResumePdfWorkshop({
               <a
                 href={pdfUrl}
                 download="akhmad-akhmedov-resume.pdf"
-                className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 text-xs font-bold flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-all"
               >
                 <Download size={12} />
-                {lang === 'ru' ? 'Скачать PDF' : 'Download PDF'}
+                Скачать PDF
               </a>
             </div>
             <iframe
               key={pdfUrl}
               title="Resume PDF Preview"
-              src={pdfUrl ? `${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0` : ''}
-              className="w-full h-[560px] bg-white rounded-xl"
+              src={
+                pdfUrl
+                  ? `${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`
+                  : ''
+              }
+              sandbox="allow-same-origin allow-scripts"
+              className="w-full h-[560px] bg-white rounded-xl border-0"
             />
           </div>
         ) : (
