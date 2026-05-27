@@ -1,17 +1,20 @@
-import React from 'react';
 import { useResumeStore } from '../store/index';
 import ProfilePanel from './profile/ProfilePanel';
 import GeneratorPanel from './generator/GeneratorPanel';
 import ResumePanel from './resume/ResumePanel';
 import PdfWorkshop from './pdf/PdfWorkshop';
+import type { LanguageCode } from '../i18n/languages';
 
-export default function ResumeWorkspace() {
+type Props = {
+  lang: LanguageCode;
+};
+
+export default function ResumeWorkspace({ lang }: Props) {
   const profile = useResumeStore((s) => s.profile);
   const savedResumes = useResumeStore((s) => s.savedResumes);
   const activeResumeId = useResumeStore((s) => s.activeResumeId);
 
   const activeResume = savedResumes.find((r) => r.id === activeResumeId) || null;
-  const [lang, setLang] = React.useState<'ru' | 'en'>('ru');
 
   return (
     <div
@@ -21,7 +24,7 @@ export default function ResumeWorkspace() {
       {/* LEFT COLUMN: Profile + Generator */}
       <div className="lg:col-span-12 xl:col-span-5 space-y-6">
         <ProfilePanel lang={lang} />
-        <GeneratorPanel lang={lang} onSetLang={setLang} />
+        <GeneratorPanel lang={lang} />
       </div>
 
       {/* RIGHT COLUMN: Archive + Portfolio + PDF */}

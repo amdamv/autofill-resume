@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useResumeStore } from '../../store/index';
 import type { ExperienceEntry } from '../../types/index';
 import { Plus, X } from 'lucide-react';
+import type { LanguageCode } from '../../i18n/languages';
 
 type Props = {
-  lang: 'ru' | 'en';
+  lang: LanguageCode;
 };
 
 export default function CompanyManager({ lang }: Props) {

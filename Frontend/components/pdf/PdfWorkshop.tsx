@@ -13,6 +13,8 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { CandidateProfile, TailoredResume } from '../../types/index';
+import type { LanguageCode } from '../../i18n/languages';
+import { getTranslations } from '../../i18n/ui';
 import {
   RESUME_FILTERS,
   RESUME_TEMPLATES,
@@ -23,7 +25,7 @@ import {
 type Props = {
   profile: CandidateProfile;
   activeResume: TailoredResume | null;
-  lang: 'ru' | 'en';
+  lang: LanguageCode;
 };
 
 export default function ResumePdfWorkshop({
@@ -31,6 +33,7 @@ export default function ResumePdfWorkshop({
   activeResume,
   lang,
 }: Props) {
+  const t = getTranslations(lang);
   const [templateId, setTemplateId] =
     useState<ResumeTemplateId>('akhmad-classic');
   const [filterId, setFilterId] = useState<ResumeFilterId>('source');
@@ -140,8 +143,6 @@ export default function ResumePdfWorkshop({
     }
   }, [activeResume, renderPayload]);
 
-  // PDF рендерится только по кнопке "Собрать PDF"
-
   return (
     <div className="bg-[#101322]/90 border border-cyan-500/20 rounded-2xl p-5 shadow-xl space-y-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#1f2947] pb-3">
@@ -151,9 +152,7 @@ export default function ResumePdfWorkshop({
             LaTeX Workshop
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            {lang === 'ru'
-              ? 'Нажми "Собрать PDF" чтобы скомпилировать и посмотреть PDF прямо в браузере.'
-              : 'Click "Render PDF" to compile and preview PDF directly in browser.'}
+            {t.pdf.intro}
           </p>
         </div>
 
@@ -169,7 +168,7 @@ export default function ResumePdfWorkshop({
           ) : (
             <Eye size={14} />
           )}
-          {lang === 'ru' ? 'Собрать PDF' : 'Render PDF'}
+          {t.pdf.render}
         </button>
       </div>
 
@@ -177,7 +176,7 @@ export default function ResumePdfWorkshop({
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-cyan-300 mb-2">
             <FileCode2 size={13} />
-            Templates
+            {t.pdf.templates}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2">
             {RESUME_TEMPLATES.map((template) => (
@@ -197,7 +196,7 @@ export default function ResumePdfWorkshop({
                   </span>
                 </div>
                 <p className="text-[10px] leading-relaxed mt-1">
-                  {template.description}
+                  {template.description[lang]}
                 </p>
               </button>
             ))}
@@ -207,7 +206,7 @@ export default function ResumePdfWorkshop({
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-cyan-300 mb-2">
             <SlidersHorizontal size={13} />
-            Filters
+            {t.pdf.filters}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {RESUME_FILTERS.map((filter) => (
@@ -222,7 +221,7 @@ export default function ResumePdfWorkshop({
               >
                 <span className="text-xs font-bold">{filter.name}</span>
                 <p className="text-[10px] leading-relaxed mt-1">
-                  {filter.description}
+                  {filter.description[lang]}
                 </p>
               </button>
             ))}
@@ -249,7 +248,7 @@ export default function ResumePdfWorkshop({
                 className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-all"
               >
                 <Download size={12} />
-                Скачать PDF
+                {t.pdf.download}
               </a>
             </div>
             <iframe
@@ -269,17 +268,11 @@ export default function ResumePdfWorkshop({
             <FileCode2 size={42} className="text-cyan-500/40 mb-3" />
             <h3 className="text-sm font-bold text-slate-200 mb-1">
               {isRendering
-                ? lang === 'ru'
-                  ? 'Собираем PDF...'
-                  : 'Rendering PDF...'
-                : lang === 'ru'
-                  ? 'PDF ещё не собран'
-                  : 'No PDF rendered yet'}
+                ? t.pdf.rendering
+                : t.pdf.emptyTitle}
             </h3>
             <p className="text-xs text-slate-500 max-w-md">
-              {lang === 'ru'
-                ? 'Нажми "Собрать PDF", backend скомпилирует LaTeX и покажет результат здесь.'
-                : 'Click "Render PDF". The backend compiles LaTeX and shows the result here.'}
+              {t.pdf.emptyDescription}
             </p>
           </div>
         )}

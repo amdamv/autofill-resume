@@ -1,8 +1,9 @@
 import React from 'react';
 import { Trash2 } from 'lucide-react';
 import { useResumeStore } from '../../store/index';
+import type { LanguageCode } from '../../i18n/languages';
 
-type Props = { lang: 'ru' | 'en' };
+type Props = { lang: LanguageCode };
 
 export default function ResumeArchive({ lang }: Props) {
   const savedResumes = useResumeStore((s) => s.savedResumes);
