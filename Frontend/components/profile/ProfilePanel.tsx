@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { useResumeStore } from '../../store/index';
-import { User, Briefcase, Mail, Phone, Github, Linkedin, MapPin, GraduationCap } from 'lucide-react';
+import {
+  User,
+  Briefcase,
+  Mail,
+  Phone,
+  Github,
+  Linkedin,
+  MapPin,
+  GraduationCap,
+} from 'lucide-react';
 import CompanyManager from './CompanyManager';
 import type { LanguageCode } from '../../i18n/languages';
 
@@ -9,7 +18,8 @@ type Props = {
 };
 
 export default function ProfilePanel({ lang }: Props) {
-  const { profile, setProfile, addSkill, removeSkill, loadDemoProfile } = useResumeStore();
+  const { profile, setProfile, addSkill, removeSkill, loadDemoProfile } =
+    useResumeStore();
   const [newSkill, setNewSkill] = useState('');
 
   const handleProfileChange = (field: keyof typeof profile, value: any) => {
@@ -28,9 +38,7 @@ export default function ProfilePanel({ lang }: Props) {
       <div className="flex items-center justify-between mb-4 border-b border-[#1e233d] pb-3">
         <h2 className="text-lg font-display font-semibold text-emerald-400 flex items-center gap-2">
           <User size={18} />
-          {lang === 'ru'
-            ? '1. Персональный Профиль'
-            : '1. Candidate Profile'}
+          {lang === 'ru' ? '1. Персональный Профиль' : '1. Candidate Profile'}
         </h2>
         <button
           onClick={loadDemoProfile}
@@ -55,9 +63,7 @@ export default function ProfilePanel({ lang }: Props) {
               <input
                 type="text"
                 value={profile.name}
-                onChange={(e) =>
-                  handleProfileChange('name', e.target.value)
-                }
+                onChange={(e) => handleProfileChange('name', e.target.value)}
                 placeholder="Akhmad Akhmedov"
                 className="w-full pl-9 pr-3 py-2 text-sm bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
@@ -76,9 +82,7 @@ export default function ProfilePanel({ lang }: Props) {
               <input
                 type="text"
                 value={profile.title}
-                onChange={(e) =>
-                  handleProfileChange('title', e.target.value)
-                }
+                onChange={(e) => handleProfileChange('title', e.target.value)}
                 placeholder="Full-Stack Web Developer"
                 className="w-full pl-9 pr-3 py-2 text-sm bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
@@ -88,9 +92,7 @@ export default function ProfilePanel({ lang }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
-              Email
-            </label>
+            <label className="text-xs text-slate-400 block mb-1">Email</label>
             <div className="relative">
               <Mail
                 size={14}
@@ -99,10 +101,8 @@ export default function ProfilePanel({ lang }: Props) {
               <input
                 type="email"
                 value={profile.email || ''}
-                onChange={(e) =>
-                  handleProfileChange('email', e.target.value)
-                }
-                placeholder="alex.ivanov@example.com"
+                onChange={(e) => handleProfileChange('email', e.target.value)}
+                placeholder="test@example.com"
                 className="w-full pl-9 pr-3 py-2 text-sm bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
             </div>
@@ -120,9 +120,7 @@ export default function ProfilePanel({ lang }: Props) {
               <input
                 type="text"
                 value={profile.phone || ''}
-                onChange={(e) =>
-                  handleProfileChange('phone', e.target.value)
-                }
+                onChange={(e) => handleProfileChange('phone', e.target.value)}
                 placeholder="+1 (234)567-89-01"
                 className="w-full pl-9 pr-3 py-2 text-sm bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
@@ -153,9 +151,7 @@ export default function ProfilePanel({ lang }: Props) {
           </div>
 
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
-              GitHub
-            </label>
+            <label className="text-xs text-slate-400 block mb-1">GitHub</label>
             <div className="relative">
               <Github
                 size={14}
@@ -164,9 +160,7 @@ export default function ProfilePanel({ lang }: Props) {
               <input
                 type="text"
                 value={profile.github || ''}
-                onChange={(e) =>
-                  handleProfileChange('github', e.target.value)
-                }
+                onChange={(e) => handleProfileChange('github', e.target.value)}
                 placeholder="https://github.com/example"
                 className="w-full pl-9 pr-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
               />
@@ -198,9 +192,7 @@ export default function ProfilePanel({ lang }: Props) {
         {/* Skills Tag Input */}
         <div>
           <label className="text-xs text-slate-400 block mb-1">
-            {lang === 'ru'
-              ? 'Навыки и Технологии'
-              : 'Skills & Competencies'}
+            {lang === 'ru' ? 'Навыки и Технологии' : 'Skills & Competencies'}
           </label>
           <div className="flex gap-2 mb-2">
             <input
@@ -258,9 +250,7 @@ export default function ProfilePanel({ lang }: Props) {
           </label>
           <textarea
             value={profile.experience}
-            onChange={(e) =>
-              handleProfileChange('experience', e.target.value)
-            }
+            onChange={(e) => handleProfileChange('experience', e.target.value)}
             placeholder={
               lang === 'ru'
                 ? 'Расскажите кратко где и кем работали, чтобы AI мог адаптировать эти данные под вакансию'
@@ -284,9 +274,7 @@ export default function ProfilePanel({ lang }: Props) {
             <input
               type="text"
               value={profile.education}
-              onChange={(e) =>
-                handleProfileChange('education', e.target.value)
-              }
+              onChange={(e) => handleProfileChange('education', e.target.value)}
               placeholder="МГТУ им. Баумана, 2024"
               className="w-full pl-9 pr-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
             />

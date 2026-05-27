@@ -125,7 +125,6 @@ export class RenderResumeDto {
 
   @IsOptional()
   @IsString()
-  @IsIn(['akhmad-classic', 'compact-ats', 'modern-balanced'])
   templateId?: string;
 
   @IsOptional()
