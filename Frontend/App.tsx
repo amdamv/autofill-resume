@@ -6,7 +6,7 @@ import ExtensionSimulator from './components/extension/ExtensionSimulator';
 import JobTemplates from './components/templates/JobTemplates';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import { Layers, Puzzle, Bookmark, BookOpen, RefreshCw, Zap } from 'lucide-react';
+import { Layers, Puzzle, Bookmark, BookOpen, Zap } from 'lucide-react';
 import {
   DEFAULT_LANGUAGE,
   type LanguageCode,
@@ -16,66 +16,69 @@ import { getTranslations } from './i18n/ui';
 export default function App() {
   const savedResumes = useResumeStore((state) => state.savedResumes);
   const activeResumeId = useResumeStore((state) => state.activeResumeId);
-  const setProfile = useResumeStore((state) => state.setProfile);
   const setJobInputs = useResumeStore((state) => state.setJobInputs);
 
   // Active Main tab: 'workspace' | 'extension' | 'templates'
-  const [activeTab, setActiveTab] = useState<"workspace" | "extension" | "templates">("workspace");
+  const [activeTab, setActiveTab] = useState<
+    'workspace' | 'extension' | 'templates'
+  >('workspace');
   const [lang, setLang] = useState<LanguageCode>(DEFAULT_LANGUAGE);
   const t = getTranslations(lang);
 
-  const selectJobTemplate = (job: typeof MOCK_JOBS[0]) => {
+  const selectJobTemplate = (job: (typeof MOCK_JOBS)[0]) => {
     setJobInputs({
       jobDescription: job.description,
       targetCompany: job.company,
-      targetRole: job.role
+      targetRole: job.role,
     });
-    setActiveTab("workspace");
+    setActiveTab('workspace');
 
     // Smooth scroll down to workspace section
-    const element = document.getElementById("resume-workspace");
+    const element = document.getElementById('resume-workspace');
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const activeResume = savedResumes.find((r) => r.id === activeResumeId) || null;
+  const activeResume =
+    savedResumes.find((r) => r.id === activeResumeId) || null;
 
   return (
-    <div className="min-h-screen bg-[#07080e] text-slate-100 font-sans flex flex-col selection:bg-emerald-500 selection:text-slate-900">
+    <div className="app-root min-h-screen text-primary font-sans flex flex-col selection:bg-emerald-500 selection:text-slate-900">
 
-      {/* GLOW DECORATIONS */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/3 right-10 w-80 h-80 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-      <Header savedResumesCount={savedResumes.length} lang={lang} onSetLang={setLang} />
+      <Header
+        savedResumesCount={savedResumes.length}
+        lang={lang}
+        onSetLang={setLang}
+      />
 
       {/* MAIN NAVIGATION BAR */}
-      <div className="bg-[#0b0c13] border-b border-[#181c33] sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="bg-header border-b border-header sticky top-0 z-20">
+        <div className="max-w-container flex items-center justify-between">
           <nav className="flex space-x-1 py-2">
-
             <button
-              onClick={() => setActiveTab("workspace")}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all relative ${
-                activeTab === "workspace"
-                  ? "bg-[#181d36]/90 text-white border-b-2 border-emerald-400"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-[#111425]/50"
+              onClick={() => setActiveTab('workspace')}
+              className={`nav-tab ${
+                activeTab === 'workspace' ? 'nav-tab--active' : 'nav-tab--inactive'
               }`}
             >
-              <Layers size={14} className={activeTab === 'workspace' ? 'text-emerald-400' : ''} />
+              <Layers
+                size={14}
+                className={activeTab === 'workspace' ? 'text-emerald-400' : ''}
+              />
               {t.nav.workspace}
             </button>
 
             <button
-              onClick={() => setActiveTab("extension")}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all relative ${
-                activeTab === "extension"
-                  ? "bg-[#181d36]/90 text-white border-b-2 border-emerald-400"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-[#111425]/50"
+              onClick={() => setActiveTab('extension')}
+              className={`nav-tab ${
+                activeTab === 'extension' ? 'nav-tab--active' : 'nav-tab--inactive'
               }`}
             >
-              <Puzzle size={14} className={activeTab === 'extension' ? 'text-emerald-400' : ''} />
+              <Puzzle
+                size={14}
+                className={activeTab === 'extension' ? 'text-emerald-400' : ''}
+              />
               {t.nav.extension}
               {activeResume && (
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
@@ -83,94 +86,69 @@ export default function App() {
             </button>
 
             <button
-              onClick={() => setActiveTab("templates")}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all relative ${
-                activeTab === "templates"
-                  ? "bg-[#181d36]/90 text-white border-b-2 border-emerald-400"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-[#111425]/50"
+              onClick={() => setActiveTab('templates')}
+              className={`nav-tab ${
+                activeTab === 'templates' ? 'nav-tab--active' : 'nav-tab--inactive'
               }`}
             >
-              <Bookmark size={14} className={activeTab === 'templates' ? 'text-emerald-400' : ''} />
+              <Bookmark
+                size={14}
+                className={activeTab === 'templates' ? 'text-emerald-400' : ''}
+              />
               {t.nav.templates}
             </button>
-
           </nav>
 
-          <div className="hidden lg:flex items-center gap-2 text-[11px] text-slate-400 bg-[#12162a]/60 border border-[#212749] px-3 py-1.5 rounded-full">
+          <div className="hidden lg:flex items-center gap-2 text-[11px] text-secondary bg-badge/60 border border-badge px-3 py-1.5 rounded-full">
             <Zap size={12} className="text-amber-400 glow-animation" />
-            <span>{t.model.selected} <strong className="text-emerald-300 font-mono">claude-sonnet</strong></span>
+            <span>
+              {t.model.selected}{' '}
+              <strong className="text-emerald-300 font-mono">
+                claude-sonnet
+              </strong>
+            </span>
           </div>
         </div>
       </div>
 
       {/* CORE FRAME CONTENT */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col overflow-hidden">
-
         {/* Quick Informative Flow Header - guides user step by step */}
-        <div className="bg-[#121526]/50 border border-indigo-500/10 p-4 rounded-xl mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-guide-card/50 border border-indigo-500/10 p-4 rounded-xl mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
             <BookOpen size={18} className="text-emerald-400 mt-0.5" />
             <div className="text-xs">
-              <strong className="text-white block mb-0.5">🚀 {t.guide.title}</strong>
-              <p className="text-slate-400 leading-relaxed">
+              <strong className="text-white block mb-0.5">
+                🚀 {t.guide.title}
+              </strong>
+              <p className="text-secondary leading-relaxed">
                 {t.guide.beforeDashboard}{' '}
-                <strong className="text-indigo-300">{t.nav.workspaceShort}</strong>{' '}
+                <strong className="text-indigo-300">
+                  {t.nav.workspaceShort}
+                </strong>{' '}
                 {t.guide.afterDashboard}{' '}
-                <strong className="text-emerald-300">{t.nav.extensionShort}</strong>{' '}
+                <strong className="text-emerald-300">
+                  {t.nav.extensionShort}
+                </strong>{' '}
                 {t.guide.afterExtension}
               </p>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setProfile({
-                  name: "Akhmad Akhmedov",
-                  title: "Middle Node.js Backend Developer",
-                  email: "",
-                  phone: "",
-                  linkedin: "",
-                  github: "",
-                  location: "",
-                  skills: ["TypeScript", "JavaScript", "Node.js", "NestJS", "Express", "SQL", "PostgreSQL", "MongoDB", "Redis", "TypeORM", "Kafka", "NATS", "RabbitMQ", "WebSocket", "JWT", "Docker", "Kubernetes", "CI/CD", "AWS", "MinIO", "Git", "GitHub", "Jest", "Swagger", "Postman", "Grafana", "Agile"],
-                  experience: "Backend Developer with 4+ years of experience building scalable systems using Node.js, NestJS, PostgreSQL and Kafka. Delivered high-load microservices for scalable, business-critical systems including real-time and data-intensive applications. Skilled in system design, caching, authentication, queues, and DevOps. Strong in clean code, team collaboration, and Agile.",
-                  education: "National University of Radio Electronics, Bachelor of Science in Computer Science, Sep. 2018 - Nov. 2022, Kharkiv, Ukraine"
-                });
-                setJobInputs({
-                  targetCompany: "Default LaTeX Resume",
-                  targetRole: "Middle Node.js Backend Developer",
-                  jobDescription: MOCK_JOBS[0].description
-                });
-              }}
-              className="px-3 py-1.5 text-[11px] font-semibold text-slate-300 bg-[#1f2649] hover:bg-[#28315d] rounded-lg transition-all flex items-center gap-1"
-            >
-              <RefreshCw size={11} />
-              {t.guide.restoreProfile}
-            </button>
           </div>
         </div>
 
         {/* CONTROLLER SECTION BASED ON TABS */}
         <div className="flex-grow min-h-0">
+          {activeTab === 'workspace' && <ResumeWorkspace lang={lang} />}
 
-          {activeTab === "workspace" && (
-            <ResumeWorkspace lang={lang} />
-          )}
+          {activeTab === 'extension' && <ExtensionSimulator />}
 
-          {activeTab === "extension" && (
-            <ExtensionSimulator />
-          )}
-
-          {activeTab === "templates" && (
+          {activeTab === 'templates' && (
             <JobTemplates onSelectJob={selectJobTemplate} lang={lang} />
           )}
-
         </div>
-
       </main>
 
       <Footer lang={lang} />
-
     </div>
   );
 }

@@ -14,11 +14,11 @@ export default function JobTemplates({ onSelectJob, lang }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-[#21274c] pb-2">
+      <div className="border-b border-job pb-2">
         <h2 className="text-lg font-semibold font-display text-white">
           📂 {t.templates.title}
         </h2>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-secondary">
           {t.templates.description}
         </p>
       </div>
@@ -27,13 +27,13 @@ export default function JobTemplates({ onSelectJob, lang }: Props) {
         {MOCK_JOBS.map((job) => (
           <div
             key={job.id}
-            className="bg-[#111425] border border-[#21274c] rounded-2xl p-5 hover:border-emerald-500/30 transition-all flex flex-col"
+            className="card-job hover:border-emerald-500/30 transition-all flex flex-col"
           >
             <div className="flex justify-between items-start mb-2">
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-300 font-mono font-bold px-2 py-0.5 rounded-full">
+              <span className="company-tag">
                 {job.company}
               </span>
-              <span className="text-xs text-slate-400 font-bold font-mono">
+              <span className="text-xs text-secondary font-bold font-mono">
                 {job.salary}
               </span>
             </div>
@@ -45,13 +45,13 @@ export default function JobTemplates({ onSelectJob, lang }: Props) {
               📍 {job.location}
             </p>
 
-            <div className="bg-[#080911] p-3 rounded-xl border border-[#1b1f3c] text-[11px] text-slate-400 flex-grow max-h-48 overflow-y-auto font-sans mb-5 whitespace-pre-wrap leading-relaxed">
+            <div className="job-description font-sans">
               {job.description}
             </div>
 
             <button
               onClick={() => onSelectJob(job)}
-              className="w-full py-2 bg-gradient-to-r from-emerald-500/10 to-indigo-500/10 hover:from-emerald-500/20 hover:to-indigo-500/20 border border-emerald-500/20 text-emerald-400 hover:text-emerald-300 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1"
+              className="btn-apply"
             >
               <span>{t.templates.apply}</span>
               <ExternalLink size={12} />

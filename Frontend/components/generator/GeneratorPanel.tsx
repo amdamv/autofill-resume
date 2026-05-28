@@ -19,8 +19,8 @@ export default function GeneratorPanel({ lang }: Props) {
   } = useResumeStore();
 
   return (
-    <div className="bg-[#121420]/90 border border-[#1e233d] rounded-2xl p-5 shadow-xl">
-      <h2 className="text-lg font-display font-semibold text-emerald-400 flex items-center gap-2 mb-3 border-b border-[#1e233d] pb-3">
+    <div className="panel-container p-5">
+      <h2 className="text-lg font-display font-semibold text-emerald-400 flex items-center gap-2 mb-3 border-b border-panel pb-3">
         <Sparkles size={18} />
         {lang === 'ru'
           ? '2. Таргет Вакансии & Генерация'
@@ -30,7 +30,7 @@ export default function GeneratorPanel({ lang }: Props) {
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               {lang === 'ru' ? 'Компания' : 'Target Company'}
             </label>
             <input
@@ -38,11 +38,11 @@ export default function GeneratorPanel({ lang }: Props) {
               value={targetCompany}
               onChange={(e) => setJobInputs({ targetCompany: e.target.value })}
               placeholder="SberTech, Yandex, etc."
-              className="w-full px-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+              className="input-primary"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               {lang === 'ru' ? 'Должность в вакансии' : 'Target Role Title'}
             </label>
             <input
@@ -50,14 +50,14 @@ export default function GeneratorPanel({ lang }: Props) {
               value={targetRole}
               onChange={(e) => setJobInputs({ targetRole: e.target.value })}
               placeholder="Senior Backend Developer"
-              className="w-full px-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+              className="input-primary"
             />
           </div>
         </div>
 
         <div>
           <div className="flex justify-between items-center mb-1">
-            <label className="text-xs text-slate-400">
+            <label className="text-xs text-secondary">
               {lang === 'ru'
                 ? 'Описание Вакансии (Job Description)'
                 : 'Job Description (Copy Paste Here)'}
@@ -72,7 +72,7 @@ export default function GeneratorPanel({ lang }: Props) {
                 : 'Paste the target job details...'
             }
             rows={5}
-            className="w-full px-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 font-mono"
+            className="textarea-primary font-mono"
           />
         </div>
 
@@ -86,7 +86,7 @@ export default function GeneratorPanel({ lang }: Props) {
         <button
           onClick={() => generateTailoredResume(lang)}
           disabled={isGenerating}
-          className={`w-full py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-indigo-600 hover:from-emerald-400 hover:to-indigo-500 text-white shadow-lg transition-transform active:scale-98 flex items-center justify-center gap-2 ${
+          className={`btn-gradient ${
             isGenerating ? 'opacity-70 cursor-not-allowed' : ''
           }`}
         >

@@ -30,31 +30,31 @@ export default function TagInput({
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
           placeholder={placeholder || 'Add tag...'}
-          className="flex-grow px-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+          className="input-primary"
         />
         <button
           onClick={handleAdd}
-          className="px-3 py-2 text-xs font-semibold text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-lg transition-colors"
+          className="btn-add"
         >
           +
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto p-1 bg-[#090a0f]/50 border border-[#20253f]/30 rounded-lg">
+      <div className="tag-container">
         {tags.length === 0 ? (
-          <span className="text-[11px] text-slate-600 p-1">
+          <span className="text-[11px] text-muted p-1">
             {emptyLabel || 'No items added...'}
           </span>
         ) : (
           tags.map((tag, index) => (
             <span
               key={index}
-              className="text-[11px] flex items-center gap-1 px-2 py-0.5 bg-[#171b30] border border-[#282f56] text-emerald-300 rounded-full"
+              className="tag-pill"
             >
               {tag}
               <button
                 onClick={() => onRemove(tag)}
-                className="text-slate-500 hover:text-red-400 font-bold ml-1"
+                className="text-muted hover:text-red-400 font-bold ml-1"
               >
                 ×
               </button>

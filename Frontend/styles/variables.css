@@ -1,0 +1,56 @@
+:root {
+  /* === Background colors === */
+  --bg-page: #25213b;
+  --bg-header: #0b0c13;
+  --bg-nav-hover: #111425;
+  --bg-tab-active: #181d36;
+  --bg-badge: #12162a;
+  --bg-panel: #121420;
+  --bg-surface: #090a0f;
+  --bg-surface-deep: #07080d;
+  --bg-surface-input: #0d0f1b;
+  --bg-tag: #171b30;
+  --bg-guide-card: #121526;
+
+  /* === Border colors === */
+  --border-default: #20253f;
+  --border-panel: #1e233d;
+  --border-header: #181c33;
+  --border-input-highlight: #1e2448;
+  --border-tag: #282f56;
+  --border-job: #21274c;
+  --border-badge: #212749;
+
+  /* === Text colors === */
+  --text-primary: #f1f5f9;
+  --text-body: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* === Extension-specific colors === */
+  --ext-bg: #08090f;
+  --ext-bg-window: #0c0d15;
+  --ext-bg-topbar: #0b0c15;
+  --ext-bg-bottombar: #0b0d19;
+  --ext-bg-tabs: #14172a;
+  --ext-bg-input: #0d0f1b;
+  --ext-bg-input-compact: #06070d;
+  --ext-border-input: #1e2448;
+  --ext-border-compact: #21274d;
+  --ext-bg-panel: #090b14;
+
+  /* === Pdf-specific colors === */
+  --pdf-bg-filter: #080a12;
+  --pdf-border-filter: #202744;
+  --pdf-bg-preview: #0d1020;
+  --pdf-bg-template: #101322;
+  --pdf-border-template: #1f2947;
+
+  /* === Job templates === */
+  --job-bg-card: #111425;
+  --job-bg-tag: #080911;
+  --job-border-tag: #1b1f3c;
+
+  /* === Footer === */
+  --footer-link: #8e95b3;
+}

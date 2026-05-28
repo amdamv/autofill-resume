@@ -144,14 +144,14 @@ export default function ResumePdfWorkshop({
   }, [activeResume, renderPayload]);
 
   return (
-    <div className="bg-[#101322]/90 border border-cyan-500/20 rounded-2xl p-5 shadow-xl space-y-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#1f2947] pb-3">
+    <div className="pdf-container">
+      <div className="pdf-header">
         <div>
           <h2 className="text-lg font-display font-semibold text-cyan-300 flex items-center gap-2">
             <FileCode2 size={18} />
             LaTeX Workshop
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-secondary mt-1">
             {t.pdf.intro}
           </p>
         </div>
@@ -159,7 +159,7 @@ export default function ResumePdfWorkshop({
         <button
           onClick={renderPdf}
           disabled={!activeResume || isRendering}
-          className={`px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 transition-all flex items-center justify-center gap-2 ${
+          className={`btn-pdf-render ${
             !activeResume || isRendering ? 'opacity-60 cursor-not-allowed' : ''
           }`}
         >
@@ -183,10 +183,10 @@ export default function ResumePdfWorkshop({
               <button
                 key={template.id}
                 onClick={() => setTemplateId(template.id)}
-                className={`text-left p-3 rounded-xl border transition-all ${
+                className={`btn-template ${
                   templateId === template.id
-                    ? 'bg-cyan-500/10 border-cyan-400/50 text-white'
-                    : 'bg-[#080a12]/60 border-[#202744] text-slate-400 hover:border-slate-600'
+                    ? 'btn-template--active'
+                    : 'btn-template--inactive'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -213,10 +213,10 @@ export default function ResumePdfWorkshop({
               <button
                 key={filter.id}
                 onClick={() => setFilterId(filter.id)}
-                className={`text-left p-3 rounded-xl border transition-all ${
+                className={`btn-template ${
                   filterId === filter.id
-                    ? 'bg-emerald-500/10 border-emerald-400/50 text-white'
-                    : 'bg-[#080a12]/60 border-[#202744] text-slate-400 hover:border-slate-600'
+                    ? 'btn-filter--active'
+                    : 'btn-template--inactive'
                 }`}
               >
                 <span className="text-xs font-bold">{filter.name}</span>
@@ -235,17 +235,17 @@ export default function ResumePdfWorkshop({
         </div>
       )}
 
-      <div className="bg-[#07080e] border border-[#202744] rounded-2xl overflow-hidden min-h-[360px]">
+      <div className="pdf-preview">
         {pdfUrl ? (
           <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between px-3 py-2 border-b border-[#202744] bg-[#0d1020]">
-              <span className="text-[11px] text-slate-400 font-mono">
+            <div className="pdf-toolbar">
+              <span className="text-[11px] text-secondary font-mono">
                 akhmad-akhmedov-resume.pdf
               </span>
               <a
                 href={pdfUrl}
                 download="akhmad-akhmedov-resume.pdf"
-                className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 text-xs font-bold flex items-center gap-1.5 transition-all"
+                className="btn-pdf-download"
               >
                 <Download size={12} />
                 {t.pdf.download}
@@ -266,12 +266,12 @@ export default function ResumePdfWorkshop({
         ) : (
           <div className="min-h-[360px] flex flex-col items-center justify-center text-center p-8">
             <FileCode2 size={42} className="text-cyan-500/40 mb-3" />
-            <h3 className="text-sm font-bold text-slate-200 mb-1">
+            <h3 className="text-sm font-bold text-body mb-1">
               {isRendering
                 ? t.pdf.rendering
                 : t.pdf.emptyTitle}
             </h3>
-            <p className="text-xs text-slate-500 max-w-md">
+            <p className="text-xs text-muted max-w-md">
               {t.pdf.emptyDescription}
             </p>
           </div>

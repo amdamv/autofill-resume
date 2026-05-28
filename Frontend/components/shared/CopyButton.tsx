@@ -41,7 +41,7 @@ export default function CopyButton({ text, label }: Props) {
     <button
       type="button"
       onClick={copy}
-      className="text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+      className="text-muted hover:text-body transition-colors flex items-center gap-1 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {copied ? (
         <Check size={12} className="text-emerald-400" />

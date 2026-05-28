@@ -1,0 +1,363 @@
+/* =============================================
+   components.css — Reusable component patterns
+   Uses @apply with Tailwind v4 and CSS variables
+   ============================================= */
+
+/* ---------- Layout ---------- */
+.max-w-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* ---------- Inputs ---------- */
+.input-primary {
+  @apply w-full px-3 py-2 text-xs rounded-lg;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+.input-primary::placeholder {
+  @apply text-slate-600;
+}
+.input-primary:focus {
+  outline: none;
+  border-color: #10b981;
+}
+
+.input-compact {
+  @apply w-full px-2.5 py-1.5 text-xs rounded-lg;
+  background-color: var(--bg-surface-deep);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+.input-compact::placeholder {
+  @apply text-slate-600;
+}
+.input-compact:focus {
+  outline: none;
+  border-color: #10b981;
+}
+
+.textarea-primary {
+  @apply w-full px-3 py-2 text-xs rounded-lg resize-none;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+.textarea-primary::placeholder {
+  @apply text-slate-600;
+}
+.textarea-primary:focus {
+  outline: none;
+  border-color: #10b981;
+}
+
+/* ---------- Buttons ---------- */
+.btn-add {
+  @apply px-3 py-2 text-xs font-semibold rounded-lg transition-colors;
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+.btn-add:hover {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.btn-add-sm {
+  @apply px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-colors;
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+.btn-add-sm:hover {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.btn-gradient {
+  @apply w-full py-2.5 rounded-xl font-bold text-sm text-white shadow-lg transition-transform active:scale-98 flex items-center justify-center gap-2;
+  background: linear-gradient(to right, #10b981, #4f46e5);
+}
+.btn-gradient:hover {
+  background: linear-gradient(to right, #34d399, #818cf8);
+}
+
+.btn-gradient-emerald {
+  @apply w-full py-2.5 rounded-xl font-bold text-sm text-white shadow-lg transition-transform active:scale-98 flex items-center justify-center gap-2;
+  background: linear-gradient(to right, #10b981, #059669);
+}
+.btn-gradient-emerald:hover {
+  background: linear-gradient(to right, #34d399, #10b981);
+}
+
+.btn-gradient-indigo {
+  @apply w-full py-2.5 px-3 rounded-lg font-bold text-xs text-white shadow-lg transition-transform active:scale-97 flex items-center justify-center gap-1.5;
+  background: linear-gradient(to right, #4f46e5, #6366f1);
+}
+.btn-gradient-indigo:hover {
+  background: linear-gradient(to right, #6366f1, #818cf8);
+}
+
+.btn-destructive {
+  @apply transition-colors;
+  color: #475569;
+}
+.btn-destructive:hover {
+  color: #f87171;
+}
+
+/* ---------- Cards & Panels ---------- */
+.panel-container {
+  border: 1px solid var(--border-panel);
+  border-radius: 16px;
+  background-color: var(--bg-panel);
+  opacity: 0.9;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.panel-container\/75 {
+  border: 1px solid var(--border-panel);
+  border-radius: 16px;
+  background-color: var(--bg-panel);
+  opacity: 0.75;
+}
+
+.card-surface {
+  @apply p-3 rounded-xl;
+  background-color: rgba(9, 10, 15, 0.6);
+  border: 1px solid rgba(32, 37, 63, 0.5);
+}
+
+.card-empty {
+  @apply p-8 flex flex-col items-center justify-center text-center flex-grow rounded-2xl;
+  background-color: rgba(18, 20, 32, 0.5);
+  border: 1px solid rgba(30, 35, 61, 0.7);
+  color: var(--text-muted);
+}
+
+.card-job {
+  background-color: var(--job-bg-card);
+  border: 1px solid var(--border-job);
+  @apply rounded-2xl p-5;
+}
+
+/* ---------- Navigation Tabs ---------- */
+.nav-tab {
+  @apply flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all relative;
+}
+.nav-tab--active {
+  background-color: var(--bg-tab-active);
+  opacity: 0.9;
+  @apply text-white border-b-2 border-emerald-400;
+}
+.nav-tab--inactive {
+  color: var(--text-secondary);
+}
+.nav-tab--inactive:hover {
+  @apply text-slate-200;
+  background-color: var(--bg-nav-hover);
+  opacity: 0.5;
+}
+
+/* ---------- Tags / Skills ---------- */
+.tag-container {
+  @apply flex flex-wrap gap-1 max-h-24 overflow-y-auto p-1 rounded-lg;
+  background-color: rgba(9, 10, 15, 0.5);
+  border: 1px solid rgba(32, 37, 63, 0.3);
+}
+
+.tag-pill {
+  @apply text-[11px] flex items-center gap-1 px-2 py-0.5 rounded-full;
+  background-color: var(--bg-tag);
+  border: 1px solid var(--border-tag);
+  color: #6ee7b7;
+}
+
+/* ---------- Section heading ---------- */
+.section-title {
+  @apply text-xs font-bold uppercase tracking-widest flex items-center gap-1 font-display;
+  color: #10b981;
+}
+
+/* ---------- Border utility classes ---------- */
+.border-default { border-color: var(--border-default); }
+.border-panel { border-color: var(--border-panel); }
+
+/* ---------- Text utility classes ---------- */
+.text-primary { color: var(--text-primary); }
+.text-body { color: var(--text-body); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+
+/* ---------- Input with icon (ProfilePanel) ---------- */
+.input-with-icon {
+  @apply w-full pl-9 pr-3 py-2 rounded-lg;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+.input-with-icon::placeholder {
+  color: #475569;
+}
+.input-with-icon:focus {
+  outline: none;
+  border-color: #10b981;
+}
+
+.input-icon {
+  @apply absolute left-3 top-3;
+  color: var(--text-muted);
+}
+
+/* ---------- Badge / Chip patterns ---------- */
+.badge-active {
+  @apply text-[10px] font-bold font-mono px-2.5 py-1 rounded-full;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.skill-chip {
+  @apply text-xs px-2.5 py-0.5 rounded-md;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+.company-tag {
+  @apply text-[10px] font-mono font-bold px-2 py-0.5 rounded-full;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+}
+
+.job-description {
+  @apply p-3 rounded-xl border text-[11px] flex-grow max-h-48 overflow-y-auto mb-5 whitespace-pre-wrap leading-relaxed;
+  background-color: var(--bg-surface-deep);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+.btn-apply {
+  @apply w-full py-2 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));
+}
+.btn-apply:hover {
+  color: #6ee7b7;
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.2), rgba(99, 102, 241, 0.2));
+}
+
+/* ---------- Portfolio card (active resume) ---------- */
+.portfolio-card {
+  @apply rounded-2xl p-6 relative shadow-2xl flex-grow overflow-y-auto;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  background-color: rgba(19, 23, 44, 0.9);
+}
+
+.skill-filter-container {
+  @apply flex flex-wrap gap-1.5 p-2.5 rounded-xl;
+  background-color: rgba(9, 10, 15, 0.4);
+  border: 1px solid rgba(32, 37, 63, 0.3);
+}
+
+/* ---------- Solid indigo button (extension my-data) ---------- */
+.btn-indigo-solid {
+  @apply w-full py-1.5 rounded font-bold text-[10px] transition-colors;
+  background-color: #4f46e5;
+  color: white;
+}
+.btn-indigo-solid:hover {
+  background-color: #6366f1;
+}
+
+/* ---------- Small clear button ---------- */
+.btn-clear-small {
+  @apply text-[10px] px-2 py-1 rounded transition-colors;
+  color: var(--text-muted);
+  border: 1px solid rgba(71, 85, 105, 0.6);
+}
+.btn-clear-small:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ---------- Extension custom field card ---------- */
+.ext-field-card {
+  @apply px-2.5 py-2 rounded-lg flex items-center justify-between text-xs transition-all;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-default);
+}
+
+/* ---------- Company card (inside profile) ---------- */
+.company-form {
+  border: 1px solid var(--border-default);
+  @apply rounded-xl p-3 mb-2 space-y-2;
+  background-color: rgba(9, 10, 15, 0.8);
+}
+
+.company-card {
+  @apply rounded-xl border p-3;
+  background-color: rgba(9, 10, 15, 0.6);
+  border-color: rgba(32, 37, 63, 0.5);
+}
+
+/* ---------- PDF Workshop ---------- */
+.pdf-container {
+  @apply rounded-2xl p-5 shadow-xl space-y-4;
+  background-color: rgba(16, 19, 34, 0.9);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.pdf-header {
+  @apply flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3;
+  border-bottom: 1px solid var(--pdf-border-template);
+}
+
+.btn-pdf-render {
+  @apply px-4 py-2 rounded-xl text-xs font-bold text-white transition-all flex items-center justify-center gap-2;
+  background: linear-gradient(to right, #06b6d4, #10b981);
+}
+
+.btn-template {
+  @apply text-left p-3 rounded-xl border transition-all;
+}
+.btn-template--active {
+  background-color: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.5);
+  color: white;
+}
+.btn-template--inactive {
+  background-color: rgba(8, 10, 18, 0.6);
+  border-color: var(--pdf-border-filter);
+  color: var(--text-secondary);
+}
+.btn-template--inactive:hover {
+  border-color: #475569;
+}
+
+.btn-filter--active {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: white;
+}
+
+.pdf-preview {
+  @apply rounded-2xl overflow-hidden min-h-[360px];
+  background-color: var(--bg-surface-deep);
+  border: 1px solid var(--pdf-border-filter);
+}
+
+.pdf-toolbar {
+  @apply flex items-center justify-between px-3 py-2;
+  border-bottom: 1px solid var(--pdf-border-filter);
+  background-color: var(--pdf-bg-preview);
+}
+
+.btn-pdf-download {
+  @apply px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+.btn-pdf-download:hover {
+  color: #a7f3d0;
+}

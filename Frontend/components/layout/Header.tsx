@@ -14,8 +14,8 @@ export default function Header({ savedResumesCount, lang, onSetLang }: Props) {
   const t = getTranslations(lang);
 
   return (
-    <header className="relative border-b border-[#1b1f38] bg-[#0c0d15]/80 backdrop-blur-md z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+    <header className="relative border-b border-header bg-header/80 backdrop-blur-md z-10">
+      <div className="max-w-container py-4 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-emerald-500/10">
             <Sparkles className="text-white animate-pulse" size={20} />
@@ -27,7 +27,7 @@ export default function Header({ savedResumesCount, lang, onSetLang }: Props) {
                 NestJS + Zustand
               </span>
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-secondary">
               {t.header.subtitle}
             </p>
           </div>
@@ -37,9 +37,9 @@ export default function Header({ savedResumesCount, lang, onSetLang }: Props) {
           <LanguageSelector value={lang} onChange={onSetLang} />
 
           {/* Quick Stats Banner */}
-          <div className="hidden md:flex items-center gap-6 text-xs text-slate-400 border-l border-[#1e2344] pl-6 h-10">
+          <div className="hidden md:flex items-center gap-6 text-xs text-secondary border-l border-header pl-6 h-10">
             <div>
-              <span className="text-slate-500 block text-[10px] uppercase">
+              <span className="text-muted block text-[10px] uppercase">
                 {t.header.generationsLabel}
               </span>
               <span className="text-white font-mono font-bold">
@@ -47,7 +47,7 @@ export default function Header({ savedResumesCount, lang, onSetLang }: Props) {
               </span>
             </div>
             <div>
-              <span className="text-slate-500 block text-[10px] uppercase">
+              <span className="text-muted block text-[10px] uppercase">
                 {t.header.aiStatusLabel}
               </span>
               <span className="text-emerald-400 font-mono font-bold flex items-center gap-1">

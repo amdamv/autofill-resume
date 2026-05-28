@@ -34,10 +34,10 @@ export default function ResumePortfolio({ lang }: Props) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="bg-[#13172c]/90 border border-emerald-500/20 rounded-2xl p-6 relative shadow-2xl flex-grow overflow-y-auto"
+          className="portfolio-card"
         >
           {/* Badge indicating active in extension */}
-          <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-400 font-mono">
+          <div className="badge-active absolute top-4 right-4 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
             {lang === 'ru'
               ? 'АКТИВНО ДЛЯ РАСШИРЕНИЯ'
@@ -45,20 +45,20 @@ export default function ResumePortfolio({ lang }: Props) {
           </div>
 
           {/* Header */}
-          <div className="border-b border-[#20253f] pb-4 mb-5">
+          <div className="border-b border-default pb-4 mb-5">
             <span className="text-xs text-rose-400 font-mono font-bold uppercase tracking-widest block mb-0.5">
               ✦ Optimized AI Portfolio
             </span>
             <h1 className="text-2xl font-bold font-display text-white">
               {profile.name || 'Candidate Name'}
             </h1>
-            <p className="text-[#10b981] font-medium text-sm flex items-center gap-1">
+            <p className="text-emerald-dark font-medium text-sm flex items-center gap-1">
               {activeResume.jobTitle}{' '}
-              <span className="text-slate-500">at</span>{' '}
+              <span className="text-muted">at</span>{' '}
               {activeResume.companyName}
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-3 text-xs text-slate-400">
+            <div className="flex flex-wrap gap-4 mt-3 text-xs text-secondary">
               {profile.email && <span>📧 {profile.email}</span>}
               {profile.phone && <span>📱 {profile.phone}</span>}
               <span className="truncate">
@@ -68,17 +68,17 @@ export default function ResumePortfolio({ lang }: Props) {
           </div>
 
           {/* Sections */}
-          <div className="space-y-5 text-sm text-slate-300">
+          <div className="space-y-5 text-sm text-body">
             {/* 1. Summary */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#10b981] flex items-center gap-1 font-display">
+                <h3 className="section-title">
                   <FileText size={12} />
                   {lang === 'ru' ? 'О Себе (Summary)' : 'About Me / Summary'}
                 </h3>
                 <CopyButton text={activeResume.summary} label="Copy" />
               </div>
-              <p className="bg-[#090a0f]/60 p-3 rounded-xl border border-[#20253f]/50 leading-relaxed text-slate-200">
+              <p className="card-surface leading-relaxed text-body">
                 {activeResume.summary}
               </p>
             </div>
@@ -86,7 +86,7 @@ export default function ResumePortfolio({ lang }: Props) {
             {/* 2. Highlighted Skills */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#10b981] flex items-center gap-1 font-display">
+                <h3 className="section-title">
                   <Code size={12} />
                   {lang === 'ru'
                     ? 'Интегрируемые Навыки (Job Skills Matching)'
@@ -97,11 +97,11 @@ export default function ResumePortfolio({ lang }: Props) {
                   label="Copy"
                 />
               </div>
-              <div className="flex flex-wrap gap-1.5 bg-[#090a0f]/40 p-2.5 rounded-xl border border-[#20253f]/30">
+              <div className="skill-filter-container">
                 {activeResume.highlightedSkills.map((s, idx) => (
                   <span
                     key={idx}
-                    className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs px-2.5 py-0.5 rounded-md"
+                    className="skill-chip"
                   >
                     {s}
                   </span>
@@ -112,7 +112,7 @@ export default function ResumePortfolio({ lang }: Props) {
             {/* 3. Tailored Bullets */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#10b981] flex items-center gap-1 font-display">
+                <h3 className="section-title">
                   <Briefcase size={12} />
                   {lang === 'ru'
                     ? 'Достижения и Опыт (Experience Bullets)'
@@ -123,7 +123,7 @@ export default function ResumePortfolio({ lang }: Props) {
                   label="Copy"
                 />
               </div>
-              <ul className="bg-[#090a0f]/60 p-3 rounded-xl border border-[#20253f]/50 list-disc list-inside space-y-2 text-slate-200">
+              <ul className="card-surface list-disc list-inside space-y-2 text-body">
                 {activeResume.tailoredBullets.map((bullet, idx) => (
                   <li
                     key={idx}
@@ -132,7 +132,7 @@ export default function ResumePortfolio({ lang }: Props) {
                     <span className="flex-grow">{bullet}</span>
                     <button
                       onClick={() => removeResumeBullet(idx)}
-                      className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all mt-0.5 flex-shrink-0"
+                      className="btn-destructive opacity-0 group-hover:opacity-100 transition-all mt-0.5 flex-shrink-0"
                     >
                       <X size={11} />
                     </button>
@@ -155,7 +155,7 @@ export default function ResumePortfolio({ lang }: Props) {
                       ? 'Добавить достижение...'
                       : 'Add an achievement...'
                   }
-                  className="flex-grow px-2.5 py-1.5 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                  className="input-primary"
                 />
                 <button
                   onClick={() => {
@@ -164,7 +164,7 @@ export default function ResumePortfolio({ lang }: Props) {
                       setNewBullet('');
                     }
                   }}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                  className="btn-add-sm"
                 >
                   <Plus size={14} />
                 </button>
@@ -180,7 +180,7 @@ export default function ResumePortfolio({ lang }: Props) {
                   : []
             ).length > 0 && (
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#10b981] flex items-center gap-1 font-display mb-2">
+                <h3 className="section-title mb-2">
                   <Briefcase size={12} />
                   {lang === 'ru'
                     ? 'Опыт Работы (Компании)'
@@ -195,25 +195,25 @@ export default function ResumePortfolio({ lang }: Props) {
                   ).map((exp, idx) => (
                     <div
                       key={idx}
-                      className="bg-[#090a0f]/60 p-3 rounded-xl border border-[#20253f]/50"
+                      className="card-surface"
                     >
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <div>
-                          <span className="text-sm font-bold text-slate-200">
+                          <span className="text-sm font-bold text-body">
                             {exp.company || ''}
                           </span>
                           {exp.position && (
-                            <span className="text-xs text-slate-400 ml-2">
+                            <span className="text-xs text-secondary ml-2">
                               — {exp.position}
                             </span>
                           )}
                           {exp.dates && (
-                            <span className="text-[10px] text-slate-500 font-mono ml-2">
+                            <span className="text-[10px] text-muted font-mono ml-2">
                               {exp.dates}
                             </span>
                           )}
                           {exp.location && (
-                            <span className="text-[10px] text-slate-500 ml-2">
+                            <span className="text-[10px] text-muted ml-2">
                               ({exp.location})
                             </span>
                           )}
@@ -224,7 +224,7 @@ export default function ResumePortfolio({ lang }: Props) {
                           {exp.bullets.map((b, bIdx) => (
                             <li
                               key={bIdx}
-                              className="text-xs text-slate-300 leading-relaxed"
+                              className="text-xs text-body leading-relaxed"
                             >
                               {b}
                             </li>
@@ -240,7 +240,7 @@ export default function ResumePortfolio({ lang }: Props) {
             {/* 5. Cover Letter */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-[#10b981] flex items-center gap-1 font-display">
+                <h3 className="section-title">
                   <Globe size={12} />
                   {lang === 'ru'
                     ? 'Сопроводительное Письмо (Cover Letter)'
@@ -248,24 +248,24 @@ export default function ResumePortfolio({ lang }: Props) {
                 </h3>
                 <CopyButton text={activeResume.coverLetter} label="Copy" />
               </div>
-              <p className="bg-[#090a0f]/60 p-3 rounded-xl border border-[#20253f]/50 leading-relaxed text-slate-200 italic font-sans whitespace-pre-line text-xs">
+              <p className="card-surface leading-relaxed text-body italic font-sans whitespace-pre-line text-xs">
                 {activeResume.coverLetter}
               </p>
             </div>
           </div>
         </motion.div>
       ) : (
-        <div className="bg-[#121420]/50 border border-[#1e233d]/70 rounded-2xl p-8 flex flex-col items-center justify-center text-center text-slate-500 flex-grow min-h-[300px]">
+        <div className="card-empty min-h-[300px]">
           <Sparkles
             size={40}
-            className="text-slate-600 mb-3 animate-pulse"
+            className="text-muted mb-3 animate-pulse"
           />
-          <h3 className="font-semibold text-slate-300 mb-1">
+          <h3 className="font-semibold text-body mb-1">
             {lang === 'ru'
               ? 'ИИ резюме не сгенерировано'
               : 'Ready For Generation'}
           </h3>
-          <p className="text-xs text-slate-500 max-w-sm">
+          <p className="text-xs text-muted max-w-sm">
             {lang === 'ru'
               ? 'Заполните свой профиль, вставьте вакансию слева и сгенерируйте адаптированное резюме под конкретного работодателя!'
               : "Your tailored portfolio draft will appear here. Choose a job description and click 'Tailor'."}

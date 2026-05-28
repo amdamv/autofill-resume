@@ -24,8 +24,8 @@ export default function ProfilePanel({ lang }: Props) {
   };
 
   return (
-    <div className="bg-[#121420]/90 border border-[#1e233d] rounded-2xl p-5 shadow-xl">
-      <div className="flex items-center justify-between mb-4 border-b border-[#1e233d] pb-3">
+    <div className="panel-container p-5">
+      <div className="flex items-center justify-between mb-4 border-b border-panel pb-3">
         <h2 className="text-lg font-display font-semibold text-emerald-400 flex items-center gap-2">
           <User size={18} />
           {lang === 'ru'
@@ -44,13 +44,13 @@ export default function ProfilePanel({ lang }: Props) {
         {/* General Info */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               {lang === 'ru' ? 'ФИО' : 'Full Name'}
             </label>
             <div className="relative">
               <User
                 size={14}
-                className="absolute left-3 top-3 text-slate-500"
+                className="input-icon"
               />
               <input
                 type="text"
@@ -59,19 +59,19 @@ export default function ProfilePanel({ lang }: Props) {
                   handleProfileChange('name', e.target.value)
                 }
                 placeholder="Akhmad Akhmedov"
-                className="w-full pl-9 pr-3 py-2 text-sm bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="input-with-icon text-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               {lang === 'ru' ? 'Желаемая должность' : 'Desired Title'}
             </label>
             <div className="relative">
               <Briefcase
                 size={14}
-                className="absolute left-3 top-3 text-slate-500"
+                className="input-icon"
               />
               <input
                 type="text"
@@ -80,7 +80,7 @@ export default function ProfilePanel({ lang }: Props) {
                   handleProfileChange('title', e.target.value)
                 }
                 placeholder="Full-Stack Web Developer"
-                className="w-full pl-9 pr-3 py-2 text-sm bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="input-with-icon text-sm"
               />
             </div>
           </div>
@@ -88,13 +88,13 @@ export default function ProfilePanel({ lang }: Props) {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               Email
             </label>
             <div className="relative">
               <Mail
                 size={14}
-                className="absolute left-3 top-3 text-slate-500"
+                className="input-icon"
               />
               <input
                 type="email"
@@ -103,19 +103,19 @@ export default function ProfilePanel({ lang }: Props) {
                   handleProfileChange('email', e.target.value)
                 }
                 placeholder="alex.ivanov@example.com"
-                className="w-full pl-9 pr-3 py-2 text-sm bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="input-with-icon text-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               {lang === 'ru' ? 'Телефон' : 'Phone'}
             </label>
             <div className="relative">
               <Phone
                 size={14}
-                className="absolute left-3 top-3 text-slate-500"
+                className="input-icon"
               />
               <input
                 type="text"
@@ -124,7 +124,7 @@ export default function ProfilePanel({ lang }: Props) {
                   handleProfileChange('phone', e.target.value)
                 }
                 placeholder="+1 (234)567-89-01"
-                className="w-full pl-9 pr-3 py-2 text-sm bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="input-with-icon text-sm"
               />
             </div>
           </div>
@@ -132,13 +132,13 @@ export default function ProfilePanel({ lang }: Props) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               LinkedIn
             </label>
             <div className="relative">
               <Linkedin
                 size={14}
-                className="absolute left-3 top-3 text-slate-500"
+                className="input-icon"
               />
               <input
                 type="text"
@@ -147,19 +147,19 @@ export default function ProfilePanel({ lang }: Props) {
                   handleProfileChange('linkedin', e.target.value)
                 }
                 placeholder="https://linkedin.com/in/example"
-                className="w-full pl-9 pr-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="input-with-icon text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               GitHub
             </label>
             <div className="relative">
               <Github
                 size={14}
-                className="absolute left-3 top-3 text-slate-500"
+                className="input-icon"
               />
               <input
                 type="text"
@@ -168,19 +168,19 @@ export default function ProfilePanel({ lang }: Props) {
                   handleProfileChange('github', e.target.value)
                 }
                 placeholder="https://github.com/example"
-                className="w-full pl-9 pr-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="input-with-icon text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-slate-400 block mb-1">
+            <label className="text-xs text-secondary block mb-1">
               {lang === 'ru' ? 'Локация' : 'Location'}
             </label>
             <div className="relative">
               <MapPin
                 size={14}
-                className="absolute left-3 top-3 text-slate-500"
+                className="input-icon"
               />
               <input
                 type="text"
@@ -189,7 +189,7 @@ export default function ProfilePanel({ lang }: Props) {
                   handleProfileChange('location', e.target.value)
                 }
                 placeholder="City, Country"
-                className="w-full pl-9 pr-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="input-with-icon text-xs"
               />
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function ProfilePanel({ lang }: Props) {
 
         {/* Skills Tag Input */}
         <div>
-          <label className="text-xs text-slate-400 block mb-1">
+          <label className="text-xs text-secondary block mb-1">
             {lang === 'ru'
               ? 'Навыки и Технологии'
               : 'Skills & Competencies'}
@@ -213,19 +213,19 @@ export default function ProfilePanel({ lang }: Props) {
                   ? 'Добавить навык (React)'
                   : 'Add skill (e.g. React)'
               }
-              className="flex-grow px-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+              className="input-primary"
             />
             <button
               onClick={handleAddSkill}
-              className="px-3 py-2 text-xs font-semibold text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-lg transition-colors"
+              className="btn-add"
             >
               +
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto p-1 bg-[#090a0f]/50 border border-[#20253f]/30 rounded-lg">
+          <div className="tag-container">
             {profile.skills.length === 0 ? (
-              <span className="text-[11px] text-slate-600 p-1">
+              <span className="text-[11px] text-muted p-1">
                 {lang === 'ru'
                   ? 'Навыки не указаны...'
                   : 'No skills added yet...'}
@@ -234,12 +234,12 @@ export default function ProfilePanel({ lang }: Props) {
               profile.skills.map((skill, index) => (
                 <span
                   key={index}
-                  className="text-[11px] flex items-center gap-1 px-2 py-0.5 bg-[#171b30] border border-[#282f56] text-emerald-300 rounded-full"
+                  className="tag-pill"
                 >
                   {skill}
                   <button
                     onClick={() => removeSkill(skill)}
-                    className="text-slate-500 hover:text-red-400 font-bold ml-1"
+                    className="text-muted hover:text-red-400 font-bold ml-1"
                   >
                     ×
                   </button>
@@ -251,7 +251,7 @@ export default function ProfilePanel({ lang }: Props) {
 
         {/* Work experience summaries */}
         <div>
-          <label className="text-xs text-slate-400 block mb-1">
+          <label className="text-xs text-secondary block mb-1">
             {lang === 'ru'
               ? 'Опыт Работы (базовый)'
               : 'Experience Profile (Raw)'}
@@ -267,19 +267,19 @@ export default function ProfilePanel({ lang }: Props) {
                 : 'Summarize past roles so AI can map them cleanly'
             }
             rows={4}
-            className="w-full px-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500 resize-none font-sans"
+            className="textarea-primary font-sans"
           />
         </div>
 
         {/* Education Info */}
         <div>
-          <label className="text-xs text-slate-400 block border-t border-[#1e233d]/40 pt-2 mb-1">
+          <label className="text-xs text-secondary block border-t border-panel/40 pt-2 mb-1">
             {lang === 'ru' ? 'Образование' : 'Education Detail'}
           </label>
           <div className="relative">
             <GraduationCap
               size={14}
-              className="absolute left-3 top-3 text-slate-500"
+              className="input-icon"
             />
             <input
               type="text"
@@ -288,7 +288,7 @@ export default function ProfilePanel({ lang }: Props) {
                 handleProfileChange('education', e.target.value)
               }
               placeholder="МГТУ им. Баумана, 2024"
-              className="w-full pl-9 pr-3 py-2 text-xs bg-[#090a0f] border border-[#20253f] rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+              className="input-with-icon text-xs"
             />
           </div>
         </div>

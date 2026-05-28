@@ -1,0 +1,110 @@
+/* =============================================
+   extension.css — Browser extension simulator
+   ============================================= */
+
+/* ---------- Window frame ---------- */
+.ext-window {
+  background-color: var(--ext-bg-window);
+  @apply rounded-2xl border overflow-hidden;
+  border-color: var(--border-accent);
+}
+
+/* ---------- Top and bottom bars ---------- */
+.ext-topbar {
+  background-color: var(--ext-bg-topbar);
+  @apply border-b px-4 py-2.5 flex items-center;
+  border-color: var(--border-accent);
+}
+
+.ext-bottombar {
+  background-color: var(--ext-bg-bottombar);
+  @apply border-t px-4 py-3 flex items-center justify-between;
+  border-color: var(--border-accent);
+}
+
+/* ---------- Tabs ---------- */
+.ext-tab {
+  @apply py-2 font-semibold transition-all;
+  color: var(--text-secondary);
+}
+.ext-tab--active {
+  @apply border-b-2;
+  color: #34d399;
+  border-color: #34d399;
+  background-color: var(--ext-bg-tabs);
+}
+.ext-tab--inactive:hover {
+  @apply text-slate-200;
+  background-color: var(--ext-bg-tabs);
+  opacity: 0.4;
+}
+
+/* ---------- Raw input (my-data section) ---------- */
+.ext-input-raw {
+  @apply w-full rounded px-2.5 py-1 text-[11px];
+  background-color: var(--bg-surface-deep);
+  border: 1px solid var(--border-default);
+}
+
+/* ---------- Gradient info card ---------- */
+.ext-info-card {
+  @apply p-3 rounded-xl border;
+  background: linear-gradient(to top right, var(--bg-nav-hover), var(--bg-badge));
+  border-color: rgba(99, 102, 241, 0.1);
+}
+
+/* ---------- Input fields ---------- */
+.ext-input {
+  @apply w-full px-3 py-2 rounded-lg transition-all;
+  background-color: var(--ext-bg-input);
+  border: 1px solid var(--ext-border-input);
+  color: #e2e8f0;
+}
+.ext-input::placeholder {
+  color: #475569;
+}
+.ext-input:focus {
+  outline: none;
+}
+.ext-input--highlighted {
+  border-color: #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.ext-input-compact {
+  @apply w-full px-2.5 py-1.5 rounded text-xs transition-all;
+  background-color: var(--ext-bg-input-compact);
+  color: #e2e8f0;
+}
+.ext-input-compact::placeholder {
+  color: #475569;
+}
+.ext-input-compact:focus {
+  outline: none;
+}
+.ext-input-compact--highlighted {
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+/* ---------- Cards ---------- */
+.ext-card {
+  background-color: var(--ext-bg-panel);
+  border: 1px solid var(--border-accent);
+  @apply rounded-xl p-4;
+}
+
+/* ---------- Badges ---------- */
+.ext-badge {
+  @apply text-[10px] font-mono px-2 py-0.5 rounded border;
+}
+.ext-badge--success {
+  @apply bg-green-500/80 border-green-500 text-white;
+}
+.ext-badge--warning {
+  @apply bg-yellow-500/80 border-yellow-500 text-white;
+}
+.ext-badge--error {
+  @apply bg-red-500/80 border-red-500 text-white;
+}

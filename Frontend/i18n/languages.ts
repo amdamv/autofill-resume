@@ -15,7 +15,7 @@ export const SUPPORTED_LANGUAGES = [
 
 export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number]['code'];
 
-export const DEFAULT_LANGUAGE: LanguageCode = 'ru';
+export const DEFAULT_LANGUAGE: LanguageCode = 'en';
 
 export function getLanguageConfig(code: LanguageCode) {
   return SUPPORTED_LANGUAGES.find((language) => language.code === code) ?? SUPPORTED_LANGUAGES[0];
