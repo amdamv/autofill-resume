@@ -190,7 +190,9 @@ ${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certifica
 \setmainlanguage{english}
 \setotherlanguage{russian}
 
-\setmainfont{Arial}
+\IfFontExistsTF{Arial}
+  {\setmainfont{Arial}}
+  {\setmainfont{DejaVu Sans}}
 \defaultfontfeatures{Ligatures=TeX}
 \usepackage[letterpaper,margin=0.55in]{geometry}
 \usepackage{latexsym}

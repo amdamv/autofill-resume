@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import {
   Download,
   Eye,
@@ -22,6 +25,11 @@ type Props = {
   lang: LanguageCode;
 };
 
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
+
 export default function ResumePdfWorkshop({
   profile,
   activeResume,
@@ -34,6 +42,7 @@ export default function ResumePdfWorkshop({
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isRendering, setIsRendering] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [pdfScale, setPdfScale] = useState(0.9);
   const renderRequestId = useRef(0);
   const pdfUrlRef = useRef<string | null>(null);
   const revokeTimeoutRef = useRef<number | null>(null);
@@ -234,26 +243,70 @@ export default function ResumePdfWorkshop({
               <span className="text-[11px] text-secondary font-mono">
                 akhmad-resume.pdf
               </span>
-              <a
-                href={pdfUrl}
-                download="akhmad-resume.pdf"
-                className="btn-pdf-download"
-              >
-                <Download size={12} />
-                {t.pdf.download}
-              </a>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() =>
+                    setPdfScale((prev) => Math.max(0.5, prev - 0.1))
+                  }
+                  className="btn-pdf-download px-2"
+                >
+                  −
+                </button>
+
+                <span className="text-[11px] text-cyan-300 font-mono min-w-[42px] text-center">
+                  {Math.round(pdfScale * 100)}%
+                </span>
+
+                <button
+                  onClick={() =>
+                    setPdfScale((prev) => Math.min(2, prev + 0.1))
+                  }
+                  className="btn-pdf-download px-2"
+                >
+                  +
+                </button>
+
+                <a
+                  href={pdfUrl}
+                  download="akhmad-resume.pdf"
+                  className="btn-pdf-download"
+                >
+                  <Download size={12} />
+                  {t.pdf.download}
+                </a>
+              </div>
             </div>
-            <iframe
-              key={pdfUrl}
-              title="Resume PDF Preview"
-              src={
-                pdfUrl
-                  ? `${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`
-                  : ''
-              }
-              sandbox="allow-same-origin allow-scripts"
-              className="w-full h-[560px] bg-white rounded-xl border-0"
-            />
+            <div className="w-full h-[560px] overflow-auto bg-[#525659] rounded-xl flex justify-center p-4">
+              <Document
+                file={pdfUrl}
+                loading={
+                  <div className="flex items-center justify-center h-full text-black">
+                    Loading PDF...
+                  </div>
+                }
+                error={
+                  <div className="flex flex-col items-center justify-center h-full text-sm text-slate-700 gap-2">
+                    <span>Failed to load PDF preview.</span>
+                    <a
+                      href={pdfUrl || ''}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-cyan-500 underline"
+                    >
+                      Open PDF
+                    </a>
+                  </div>
+                }
+              >
+                <Page
+                  pageNumber={1}
+                  scale={pdfScale}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                />
+              </Document>
+            </div>
           </div>
         ) : (
           <div className="min-h-[360px] flex flex-col items-center justify-center text-center p-8">

@@ -6,7 +6,7 @@ import ExtensionSimulator from './components/extension/ExtensionSimulator';
 import JobTemplates from './components/templates/JobTemplates';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import { Layers, Puzzle, Bookmark, BookOpen, Zap } from 'lucide-react';
+import { Layers, Puzzle, Bookmark, Zap } from 'lucide-react';
 import {
   DEFAULT_LANGUAGE,
   type LanguageCode,
@@ -44,7 +44,7 @@ export default function App() {
     savedResumes.find((r) => r.id === activeResumeId) || null;
 
   return (
-    <div className="app-root min-h-screen text-primary font-sans flex flex-col selection:bg-emerald-500 selection:text-slate-900">
+    <div className="app-root min-h-screen text-primary font-sans flex flex-col w-full overflow-x-hidden selection:bg-emerald-500 selection:text-slate-900">
 
       <Header
         savedResumesCount={savedResumes.length}
@@ -53,7 +53,7 @@ export default function App() {
       />
 
       {/* MAIN NAVIGATION BAR */}
-      <div className="bg-header border-b border-header sticky top-0 z-20">
+      <div className="bg-header border-b border-header sticky top-0 z-20 w-full">
         <div className="max-w-container flex items-center justify-between">
           <nav className="flex space-x-1 py-2">
             <button
@@ -113,29 +113,6 @@ export default function App() {
 
       {/* CORE FRAME CONTENT */}
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col overflow-hidden">
-        {/* Quick Informative Flow Header - guides user step by step */}
-        <div className="bg-guide-card/50 border border-indigo-500/10 p-4 rounded-xl mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <BookOpen size={18} className="text-emerald-400 mt-0.5" />
-            <div className="text-xs">
-              <strong className="text-white block mb-0.5">
-                🚀 {t.guide.title}
-              </strong>
-              <p className="text-secondary leading-relaxed">
-                {t.guide.beforeDashboard}{' '}
-                <strong className="text-indigo-300">
-                  {t.nav.workspaceShort}
-                </strong>{' '}
-                {t.guide.afterDashboard}{' '}
-                <strong className="text-emerald-300">
-                  {t.nav.extensionShort}
-                </strong>{' '}
-                {t.guide.afterExtension}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* CONTROLLER SECTION BASED ON TABS */}
         <div className="flex-grow min-h-0">
           {activeTab === 'workspace' && <ResumeWorkspace lang={lang} />}

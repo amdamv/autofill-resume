@@ -1,4 +1,3 @@
-import React from 'react';
 import { useResumeStore } from '../../store/index';
 import { Sparkles, AlertCircle } from 'lucide-react';
 import type { LanguageCode } from '../../i18n/languages';
