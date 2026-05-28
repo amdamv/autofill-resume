@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional, IsObject, ValidateNested, IsArray, IsDefined, ValidateIf } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsObject, ValidateNested, IsArray, IsDefined, ValidateIf, IsEmail, IsNumber, IsPhoneNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class ExperienceEntryDto {
@@ -24,6 +24,20 @@ class ExperienceEntryDto {
   bullets?: string[];
 }
 
+class SocialLinkDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @IsOptional()
+  @IsString()
+  platform?: string;
+
+  @IsOptional()
+  @IsString()
+  url?: string;
+}
+
 export class CandidateProfileDto {
   @IsNotEmpty()
   @IsString()
@@ -34,11 +48,12 @@ export class CandidateProfileDto {
   title!: string;
 
   @IsOptional()
-  @IsString()
+  @IsEmail()
   email?: string;
 
   @IsOptional()
-  @IsString()
+  @IsNumber()
+  @IsPhoneNumber()
   phone?: string;
 
   @IsOptional()
@@ -59,6 +74,12 @@ export class CandidateProfileDto {
   @IsOptional()
   @IsString()
   education?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SocialLinkDto)
+  socialLinks?: SocialLinkDto[];
 }
 
 export class GenerateResumeDto {

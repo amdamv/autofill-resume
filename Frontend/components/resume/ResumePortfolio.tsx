@@ -61,10 +61,31 @@ export default function ResumePortfolio({ lang }: Props) {
             <div className="flex flex-wrap gap-4 mt-3 text-xs text-secondary">
               {profile.email && <span>📧 {profile.email}</span>}
               {profile.phone && <span>📱 {profile.phone}</span>}
-              <span className="truncate">
-                🎓 {profile.education || 'Education Institution'}
-              </span>
+              {profile.educationEntries && profile.educationEntries.length > 0 ? (
+                <span className="truncate" title={profile.educationEntries.map(e => [e.degree, e.field].filter(Boolean).join(', ') + ' @ ' + e.institution).join('; ')}>
+                  🎓 {profile.educationEntries.map(e => e.institution).join(', ')}
+                </span>
+              ) : (
+                <span className="truncate">
+                  🎓 {profile.education || 'Education Institution'}
+                </span>
+              )}
             </div>
+            {profile.socialLinks && profile.socialLinks.length > 0 && (
+              <div className="flex flex-wrap gap-3 mt-2">
+                {profile.socialLinks.map((link) => (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2 truncate max-w-[200px]"
+                  >
+                    {link.url}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sections */}

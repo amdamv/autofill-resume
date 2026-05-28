@@ -6,6 +6,22 @@ export interface ExperienceEntry {
   bullets: string[];
 }
 
+export interface EducationEntry {
+  id: string;
+  institution: string;
+  degree: string;
+  field?: string;
+  dates: string;
+  location?: string;
+}
+
+export interface SocialLink {
+  id: string;
+  platform: string;
+  label: string;
+  url: string;
+}
+
 export interface CandidateProfile {
   name: string;
   title: string;
@@ -18,4 +34,6 @@ export interface CandidateProfile {
   experience: string;
   education: string;
   experienceEntries?: ExperienceEntry[];
+  educationEntries?: EducationEntry[];
+  socialLinks?: SocialLink[];
 }

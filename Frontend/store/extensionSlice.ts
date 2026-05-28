@@ -7,6 +7,7 @@ import { MOCK_JOBS } from '../data/mockJobs';
 import { generateResume } from '../services/resume';
 
 interface CustomField {
+  id: string;
   key: string;
   label: string;
   value: string;
@@ -66,17 +67,18 @@ export const createExtensionSlice: StateCreator<
   [],
   [],
   ExtensionSlice
-> = (set, get) => ({
+> = (set, get) => {
+  // Persistent timeout IDs for cleanup across calls
+  let injectTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  let highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  return {
   selectedJobId: 'job-1',
   customFields: [
-    {
-      key: 'github',
-      label: 'GitHub Ссылка',
-      value: 'https://github.com/amdamv',
-    },
-    { key: 'portfolio', label: 'Портфолио', value: 'https://amdamv' },
-    { key: 'salary', label: 'Ожидаемая Зарплата', value: '3000$' },
-    { key: 'noticePeriod', label: 'Срок выхода', value: 'Готов завтра' },
+    { id: crypto.randomUUID(), key: 'github', label: 'GitHub Ссылка', value: 'https://github.com/amdamv' },
+    { id: crypto.randomUUID(), key: 'portfolio', label: 'Портфолио', value: 'https://amdamv' },
+    { id: crypto.randomUUID(), key: 'salary', label: 'Ожидаемая Зарплата', value: '3000$' },
+    { id: crypto.randomUUID(), key: 'noticePeriod', label: 'Срок выхода', value: 'Готов завтра' },
   ],
   webFormFields: initialWebFormFields,
   scannedResume: null,
@@ -94,7 +96,7 @@ export const createExtensionSlice: StateCreator<
     set((state) => ({
       customFields: [
         ...state.customFields.filter((f) => f.key !== cleanKey),
-        { key: cleanKey, label: label.trim() || cleanKey, value: value.trim() },
+        { id: crypto.randomUUID(), key: cleanKey, label: label.trim() || cleanKey, value: value.trim() },
       ],
     }));
   },
@@ -240,11 +242,18 @@ export const createExtensionSlice: StateCreator<
       showFormHighlight: true,
     });
 
-    setTimeout(() => {
+    if (injectTimeoutId) clearTimeout(injectTimeoutId);
+    if (highlightTimeoutId) clearTimeout(highlightTimeoutId);
+
+    injectTimeoutId = setTimeout(() => {
       set({ isInjecting: false, injectStep: null });
+      injectTimeoutId = null;
     }, 1500);
-    setTimeout(() => {
+
+    highlightTimeoutId = setTimeout(() => {
       set({ showFormHighlight: false });
+      highlightTimeoutId = null;
     }, 3500);
   },
-});
+  };
+};

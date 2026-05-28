@@ -92,7 +92,7 @@ export default function CustomFieldsPanel({ lang }: Props) {
 
         <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
           {customFields.map((field) => (
-            <div key={field.key} className="ext-field-card">
+            <div key={field.id} className="ext-field-card">
               <div className="truncate max-w-[190px]">
                 <span className="text-[10px] text-muted font-bold uppercase block leading-tight">
                   {field.label}

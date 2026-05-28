@@ -8,6 +8,24 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
+class PdfSocialLinkDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @IsOptional()
+  @IsString()
+  platform?: string;
+
+  @IsOptional()
+  @IsString()
+  label?: string;
+
+  @IsOptional()
+  @IsString()
+  url?: string;
+}
+
 export class PdfCandidateProfileDto {
   @IsOptional()
   @IsString()
@@ -49,6 +67,12 @@ export class PdfCandidateProfileDto {
   @IsOptional()
   @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PdfSocialLinkDto)
+  socialLinks?: PdfSocialLinkDto[];
 }
 
 export class TailoredResumePdfDto {

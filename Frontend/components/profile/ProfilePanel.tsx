@@ -5,12 +5,11 @@ import {
   Briefcase,
   Mail,
   Phone,
-  Github,
-  Linkedin,
   MapPin,
-  GraduationCap,
 } from 'lucide-react';
 import CompanyManager from './CompanyManager';
+import EducationManager from './EducationManager';
+import SocialLinksManager from './SocialLinksManager';
 import type { LanguageCode } from '../../i18n/languages';
 
 type Props = {
@@ -116,55 +115,21 @@ export default function ProfilePanel({ lang }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label className="text-xs text-secondary block mb-1">
-              LinkedIn
-            </label>
-            <div className="relative">
-              <Linkedin size={14} className="input-icon" />
-              <input
-                type="text"
-                value={profile.linkedin || ''}
-                onChange={(e) =>
-                  handleProfileChange('linkedin', e.target.value)
-                }
-                placeholder="https://linkedin.com/in/example"
-                className="input-with-icon text-xs"
-              />
-            </div>
-          </div>
+        <SocialLinksManager lang={lang} />
 
-          <div>
-            <label className="text-xs text-secondary block mb-1">GitHub</label>
-            <div className="relative">
-              <Github size={14} className="input-icon" />
-              <input
-                type="text"
-                value={profile.github || ''}
-                onChange={(e) => handleProfileChange('github', e.target.value)}
-                placeholder="https://github.com/example"
-                className="input-with-icon text-xs"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs text-secondary block mb-1">
-              {lang === 'ru' ? 'Локация' : 'Location'}
-            </label>
-            <div className="relative">
-              <MapPin size={14} className="input-icon" />
-              <input
-                type="text"
-                value={profile.location || ''}
-                onChange={(e) =>
-                  handleProfileChange('location', e.target.value)
-                }
-                placeholder="City, Country"
-                className="input-with-icon text-xs"
-              />
-            </div>
+        <div>
+          <label className="text-xs text-secondary block mb-1">
+            {lang === 'ru' ? 'Локация' : 'Location'}
+          </label>
+          <div className="relative">
+            <MapPin size={14} className="input-icon" />
+            <input
+              type="text"
+              value={profile.location || ''}
+              onChange={(e) => handleProfileChange('location', e.target.value)}
+              placeholder="City, Country"
+              className="input-with-icon text-xs"
+            />
           </div>
         </div>
 
@@ -234,22 +199,8 @@ export default function ProfilePanel({ lang }: Props) {
           />
         </div>
 
-        {/* Education Info */}
-        <div>
-          <label className="text-xs text-secondary block border-t border-panel/40 pt-2 mb-1">
-            {lang === 'ru' ? 'Образование' : 'Education Detail'}
-          </label>
-          <div className="relative">
-            <GraduationCap size={14} className="input-icon" />
-            <input
-              type="text"
-              value={profile.education}
-              onChange={(e) => handleProfileChange('education', e.target.value)}
-              placeholder="МГТУ им. Баумана, 2024"
-              className="input-with-icon text-xs"
-            />
-          </div>
-        </div>
+        {/* Education */}
+        <EducationManager lang={lang} />
 
         {/* Experience Entries */}
         <CompanyManager lang={lang} />

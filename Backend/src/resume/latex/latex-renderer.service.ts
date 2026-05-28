@@ -276,6 +276,20 @@ ${certificatesSection}
   ): string {
     const name = this.clean(profile.name);
     const jobTitle = this.clean(title);
+
+    const raw = (profile as any).socialLinks;
+    const socialLinkEntries = (Array.isArray(raw) ? raw : [])
+      .map((link: any) => ({
+        icon: this.socialIcon(link.platform),
+        url: this.normalizeUrl(link.url),
+        label: this.clean(link.label) || this.stripProtocol(this.clean(link.url)),
+      }))
+      .filter((link: { url: string; label: string }) => link.url && link.label)
+      .map(
+        (link: { url: string; label: string; icon: string }) =>
+          String.raw`\href{${this.safeUrl(link.url)}}{\raisebox{-0.2\height}${link.icon}\ \underline{${this.escape(link.label)}}}`,
+      );
+
     const contacts = [
       profile.phone
         ? String.raw`\raisebox{-0.2\height}\faPhone\ ${this.escape(profile.phone)}`
@@ -289,6 +303,7 @@ ${certificatesSection}
       profile.github
         ? String.raw`\href{${this.safeUrl(profile.github)}}{\raisebox{-0.2\height}\faGithub\ \underline{${this.escape(this.stripProtocol(profile.github))}}}`
         : '',
+      ...socialLinkEntries,
       profile.location
         ? String.raw`\raisebox{-0.2\height}\faMapMarker* \ ${this.escape(profile.location)}`
         : '',
@@ -311,12 +326,7 @@ ${contacts.length ? `    \\small\n${contactLines}` : ''}
   }
 
   private contactLines(contacts: string[]): string[][] {
-    if (contacts.length <= 3) {
-      return [contacts];
-    }
-
-    const splitAt = Math.ceil(contacts.length / 2);
-    return [contacts.slice(0, splitAt), contacts.slice(splitAt)];
+    return [contacts];
   }
 
   private renderAboutSection(summary?: string): string {
@@ -664,5 +674,28 @@ ${bulletList}`;
 
   private safeUrl(value?: string): string {
     return (value || '').replace(/[{}\s]/g, '');
+  }
+
+  private normalizeUrl(value?: string): string {
+    const url = this.safeUrl(this.clean(value));
+    if (!url) return '';
+    if (/^(https?:\/\/|mailto:|tel:)/i.test(url)) return url;
+    return `https://${url}`;
+  }
+
+  private socialIcon(platform?: string): string {
+    const icons: Record<string, string> = {
+      linkedin: '\\faLinkedin',
+      github: '\\faGithub',
+      x: '\\faTwitter',
+      twitter: '\\faTwitter',
+      youtube: '\\faYoutube',
+      telegram: '\\faTelegram',
+      instagram: '\\faGlobe',
+      stackoverflow: '\\faGlobe',
+      website: '\\faGlobe',
+      other: '\\faGlobe',
+    };
+    return icons[this.clean(platform).toLowerCase()] || '\\faGlobe';
   }
 }
