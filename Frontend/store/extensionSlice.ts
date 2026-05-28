@@ -47,7 +47,7 @@ export interface ExtensionSlice {
   setWebFormField: (key: keyof WebFormFields, value: string) => void;
   clearWebForm: () => void;
   setScannedResume: (resume: TailoredResume | null) => void;
-  scanVacancyAndGenerate: () => Promise<void>;
+  scanVacancyAndGenerate: (lang?: string) => Promise<void>;
   autofillWebForm: () => Promise<void>;
 }
 
@@ -90,7 +90,7 @@ export const createExtensionSlice: StateCreator<StoreState, [], [], ExtensionSli
 
   setScannedResume: (resume) => set({ scannedResume: resume }),
 
-  scanVacancyAndGenerate: async () => {
+  scanVacancyAndGenerate: async (lang: string = 'ru') => {
     if (get().isScanning) return;
 
     set({ isScanning: true, scanStatusStep: '1. Чтение HTML-кода страницы...' });
@@ -107,7 +107,7 @@ export const createExtensionSlice: StateCreator<StoreState, [], [], ExtensionSli
       const rawResult = await generateResume({
         profile: get().profile,
         jobDescription: activeJob.description,
-        targetLanguage: 'ru',
+        targetLanguage: lang,
       });
 
       set({ scanStatusStep: '4. Финализация сопроводительного письма...' });

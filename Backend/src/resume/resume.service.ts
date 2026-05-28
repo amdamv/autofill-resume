@@ -13,6 +13,10 @@ import { TailoredResume } from './types/resume-types';
 import { tailoredResumeSchema } from './schemas/tailored-resume.schema';
 import { sanitizeInput } from './utils/sanitize-input';
 import { buildTailoredResumePrompt } from './prompts/tailored-resume.prompt';
+import {
+  DEFAULT_ANTHROPIC_MODEL,
+  MAX_PROMPT_TOKENS,
+} from './constants/ai.constants';
 
 @Injectable()
 export class ResumeService {
@@ -75,7 +79,7 @@ export class ResumeService {
     const ai = this.getAiClient();
     const model =
       this.configService.get<string>('anthropicModel') ||
-      'claude-sonnet-4-5-20250929';
+      DEFAULT_ANTHROPIC_MODEL;
 
     const skillsStr = Array.isArray(profile.skills)
       ? profile.skills.map((skill) => sanitizeInput(skill, 100)).join(', ')
@@ -124,7 +128,7 @@ export class ResumeService {
     try {
       const response = await ai.messages.create({
         model,
-        max_tokens: 1500,
+        max_tokens: MAX_PROMPT_TOKENS,
         thinking: { type: 'disabled' },
         system:
           'Use the format_tailored_resume tool exactly once with the finished tailored resume. Do not add commentary.',

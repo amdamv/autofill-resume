@@ -45,6 +45,63 @@ export const UI_TRANSLATIONS: Record<
       emptyTitle: string;
       emptyDescription: string;
     };
+    extension: {
+      currentVacancy: string;
+      vacancyDetails: string;
+      fullRequirements: string;
+      jobFillHint: string;
+      scanDom: string;
+      scanning: string;
+      formTitle: string;
+      formHint: string;
+      clear: string;
+      labelName: string;
+      labelEmail: string;
+      labelPhone: string;
+      labelSkills: string;
+      labelGitHub: string;
+      labelPortfolio: string;
+      labelSalary: string;
+      labelStartDate: string;
+      labelAchievements: string;
+      labelCoverLetter: string;
+      placeholderName: string;
+      placeholderEmail: string;
+      placeholderPhone: string;
+      placeholderSkills: string;
+      placeholderGitHub: string;
+      placeholderPortfolio: string;
+      placeholderSalary: string;
+      placeholderStartDate: string;
+      placeholderAchievements: string;
+      placeholderCoverLetter: string;
+      extAutofill: string;
+      extMyData: string;
+      extSmartAgent: string;
+      extAgentDesc: string;
+      extResumeReady: string;
+      extAbout: string;
+      extCoverLetter: string;
+      extCopy: string;
+      extCopied: string;
+      extFilling: string;
+      extInject: string;
+      extNotReadyTitle: string;
+      extNotReadyDesc: string;
+      extCurrentProfile: string;
+      extName: string;
+      extTitle: string;
+      extContact: string;
+      extDataTitle: string;
+      extDataDesc: string;
+      extAddField: string;
+      extFieldKey: string;
+      extFieldLabel: string;
+      extFieldValue: string;
+      extAddBtn: string;
+      extSavedData: (count: number) => string;
+      extDelete: string;
+    };
   }
 > = {
   ru: {
@@ -95,6 +152,68 @@ export const UI_TRANSLATIONS: Record<
       emptyDescription:
         'Нажми "Собрать PDF", backend скомпилирует LaTeX и покажет результат здесь.',
     },
+    extension: {
+      currentVacancy: 'Текущая открытая вакансия на странице:',
+      vacancyDetails: '✦ Детали вакансии на странице',
+      fullRequirements: 'Полные требования рекрутера:',
+      jobFillHint:
+        'Команда JobFill считывает данные из этого левого блока напрямую. Кликните на "Считать DOM & Адаптировать" в правой панели, чтобы сымитировать считывание HTML-контента!',
+      scanDom: 'Считать DOM и Адаптировать',
+      scanning: 'Считывание DOM...',
+      formTitle: 'Форма Отклика Работодателя',
+      formHint: 'Поля получат инъекцию при клике по автозаполнению.',
+      clear: 'Очистить',
+      labelName: 'ФИО Соискателя',
+      labelEmail: 'Эл. почта',
+      labelPhone: 'Телефон',
+      labelSkills: 'Релевантные навыки (ИИ Адаптация)',
+      labelGitHub: 'GitHub Ссылка',
+      labelPortfolio: 'Личный Сайт / Портфолио',
+      labelSalary: 'Желаемый Доход',
+      labelStartDate: 'Срок возможного начала работы',
+      labelAchievements: 'Адаптированные ключевые достижения (в рамках резюме)',
+      labelCoverLetter: 'Сопроводительное ИИ-Письмо (Intro Outreach Message)',
+      placeholderName: 'Akhmad Akhmedov',
+      placeholderEmail: 'email@example.com',
+      placeholderPhone: '+1 (234) 123-45-67',
+      placeholderSkills: 'TypeScript, React, Node.js...',
+      placeholderGitHub: 'https://github.com/...',
+      placeholderPortfolio: 'https://...',
+      placeholderSalary: '1000,000$',
+      placeholderStartDate: 'Через 2 недели',
+      placeholderAchievements: 'Специфика опыта под вакансию...',
+      placeholderCoverLetter:
+        'Персональное приветствие рекрутеру на базе описания вакансии...',
+      extAutofill: 'Автозаполнение',
+      extMyData: 'Пополнить данные',
+      extSmartAgent: 'JobFill Smart Agent',
+      extAgentDesc:
+        'Сканирует текст открытой вакансии слева, активирует Claude и готовит CV за секунду.',
+      extResumeReady: '✔ РЕЗЮМЕ И MESSAGE ГОТОВЫ!',
+      extAbout: 'О себе:',
+      extCoverLetter: 'Сопроводительное сообщение:',
+      extCopy: 'Копировать',
+      extCopied: 'Скопировано!',
+      extFilling: 'Вставляем ячейки...',
+      extInject: 'Вставить во все поля формы (JobFill)',
+      extNotReadyTitle: 'Резюме еще не адаптировано',
+      extNotReadyDesc:
+        'Нажмите "Считать DOM & Адаптировать" выше. Расширение прочитает требования и подготовит файлы.',
+      extCurrentProfile: 'Текущий Профиль в приложении:',
+      extName: 'ФИО:',
+      extTitle: 'Должность:',
+      extContact: 'Контакты:',
+      extDataTitle: 'Пополнить данные приложения',
+      extDataDesc:
+        'Здесь вы можете внести свои дополнительные персональные данные, ссылки на социальные сети, зарплаты или контактные данные, которые расширение мгновенно сможет вставлять в свободные ячейки заявок!',
+      extAddField: '⊕ Добавить новое поле данных:',
+      extFieldKey: 'Ключ поля (ID латиницей, например github, notice)',
+      extFieldLabel: 'Читабельное название поля',
+      extFieldValue: 'Значение поля',
+      extAddBtn: 'Внести в приложение',
+      extSavedData: (count) => `Текущие сбереженные данные (${count}):`,
+      extDelete: 'Удалить это поле',
+    },
   },
   en: {
     header: {
@@ -143,6 +262,68 @@ export const UI_TRANSLATIONS: Record<
       emptyTitle: 'No PDF rendered yet',
       emptyDescription:
         'Click "Render PDF". The backend compiles LaTeX and shows the result here.',
+    },
+    extension: {
+      currentVacancy: 'Current vacancy on page:',
+      vacancyDetails: '✦ Vacancy Details',
+      fullRequirements: 'Full employer requirements:',
+      jobFillHint:
+        'JobFill reads data from this left block directly. Click "Scan DOM & Adapt" in the right panel to simulate HTML content scanning!',
+      scanDom: 'Scan DOM & Adapt',
+      scanning: 'Reading DOM...',
+      formTitle: 'Employer Response Form',
+      formHint: 'Fields will be filled when autofill is clicked.',
+      clear: 'Clear',
+      labelName: 'Full Name',
+      labelEmail: 'Email',
+      labelPhone: 'Phone',
+      labelSkills: 'Relevant Skills (AI Adapted)',
+      labelGitHub: 'GitHub Link',
+      labelPortfolio: 'Personal Site / Portfolio',
+      labelSalary: 'Desired Salary',
+      labelStartDate: 'Earliest Start Date',
+      labelAchievements: 'Tailored Key Achievements',
+      labelCoverLetter: 'AI Cover Letter (Intro Outreach Message)',
+      placeholderName: 'Akhmad Akhmedov',
+      placeholderEmail: 'email@example.com',
+      placeholderPhone: '+1 (234) 123-45-67',
+      placeholderSkills: 'TypeScript, React, Node.js...',
+      placeholderGitHub: 'https://github.com/...',
+      placeholderPortfolio: 'https://...',
+      placeholderSalary: '100,000$',
+      placeholderStartDate: 'In 2 weeks',
+      placeholderAchievements: 'Tailored experience for this role...',
+      placeholderCoverLetter:
+        'Personalized recruiter intro message based on the job description...',
+      extAutofill: 'Autofill',
+      extMyData: 'My Data',
+      extSmartAgent: 'JobFill Smart Agent',
+      extAgentDesc:
+        'Scans the vacancy text, activates Claude, and prepares your CV in seconds.',
+      extResumeReady: '✔ RESUME AND MESSAGE READY!',
+      extAbout: 'About me:',
+      extCoverLetter: 'Cover letter:',
+      extCopy: 'Copy',
+      extCopied: 'Copied!',
+      extFilling: 'Filling fields...',
+      extInject: 'Autofill all form fields (JobFill)',
+      extNotReadyTitle: 'Resume not yet tailored',
+      extNotReadyDesc:
+        'Click "Scan DOM & Adapt" above. The extension will read the requirements and prepare your files.',
+      extCurrentProfile: 'Current Profile in App:',
+      extName: 'Name:',
+      extTitle: 'Title:',
+      extContact: 'Contact:',
+      extDataTitle: 'Add custom data',
+      extDataDesc:
+        'Here you can enter additional personal data, links to social networks, salary expectations, or contact details. The extension will instantly use them to fill in form fields!',
+      extAddField: '⊕ Add a new data field:',
+      extFieldKey: 'Field key (Latin ID, e.g., github, notice)',
+      extFieldLabel: 'Display field name',
+      extFieldValue: 'Field value',
+      extAddBtn: 'Add to app',
+      extSavedData: (count) => `Saved custom data (${count}):`,
+      extDelete: 'Delete this field',
     },
   },
 };

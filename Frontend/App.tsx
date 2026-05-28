@@ -140,7 +140,7 @@ export default function App() {
         <div className="flex-grow min-h-0">
           {activeTab === 'workspace' && <ResumeWorkspace lang={lang} />}
 
-          {activeTab === 'extension' && <ExtensionSimulator />}
+          {activeTab === 'extension' && <ExtensionSimulator lang={lang} />}
 
           {activeTab === 'templates' && (
             <JobTemplates onSelectJob={selectJobTemplate} lang={lang} />
