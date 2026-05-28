@@ -1,0 +1,9 @@
+export const DEFAULT_ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250929';
+
+export const MAX_PROMPT_TOKENS = 1500;
+
+export const INPUT_LIMITS = {
+  DEFAULT: 4000,
+  JOB_DESCRIPTION: 8000,
+  EXPERIENCE: 3000,
+};

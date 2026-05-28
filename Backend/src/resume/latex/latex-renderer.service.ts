@@ -95,7 +95,7 @@ export class LatexRendererService {
     try {
       await fs.writeFile(texPath, this.renderTex(dto, options), 'utf8');
       await execFileAsync(
-        'pdflatex',
+        'xelatex',
         [
           '-interaction=nonstopmode',
           '-halt-on-error',
@@ -184,9 +184,14 @@ ${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certifica
 
     return String.raw`\documentclass[letterpaper,${settings.fontSize}]{article}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[english]{babel}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+
+\setmainlanguage{english}
+\setotherlanguage{russian}
+
+\setmainfont{Arial}
+\defaultfontfeatures{Ligatures=TeX}
 \usepackage[letterpaper,margin=0.55in]{geometry}
 \usepackage{latexsym}
 \usepackage{titlesec}
@@ -198,7 +203,6 @@ ${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certifica
 \usepackage{fontawesome5}
 \usepackage{microtype}
 \setlength{\columnsep}{-1pt}
-\IfFileExists{glyphtounicode.tex}{\input{glyphtounicode}}{}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -218,7 +222,6 @@ ${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certifica
   \vspace{${settings.sectionSpacing}}\scshape\raggedright\large\bfseries
 }{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
 
-\pdfgentounicode=1
 
 \newcommand{\resumeItem}[1]{
   \item\small{
@@ -265,7 +268,10 @@ ${certificatesSection}
 `;
   }
 
-  private renderHeader(profile: RenderResumeDto['profile'], title: string): string {
+  private renderHeader(
+    profile: RenderResumeDto['profile'],
+    title: string,
+  ): string {
     const name = this.clean(profile.name);
     const jobTitle = this.clean(title);
     const contacts = [
@@ -320,7 +326,9 @@ ${contacts.length ? `    \\small\n${contactLines}` : ''}
 \vspace{-5pt}`;
   }
 
-  private renderSkillsSection(skillGroups: ReturnType<LatexRendererService['groupSkills']>): string {
+  private renderSkillsSection(
+    skillGroups: ReturnType<LatexRendererService['groupSkills']>,
+  ): string {
     const rows = [
       { label: 'Backend', values: skillGroups.backend },
       { label: 'Frontend', values: skillGroups.frontend },
@@ -330,7 +338,10 @@ ${contacts.length ? `    \\small\n${contactLines}` : ''}
       { label: 'AI/LLM Tools', values: skillGroups.ai },
     ]
       .filter((row) => row.values.length)
-      .map((row) => `    \\textbf{${row.label}:} ${this.escape(row.values.join(', '))}`)
+      .map(
+        (row) =>
+          `    \\textbf{${row.label}:} ${this.escape(row.values.join(', '))}`,
+      )
       .join(' \\\\\n');
 
     if (!rows) return '';
@@ -387,7 +398,11 @@ ${rows}
       }))
       .filter(
         (item) =>
-          item.company || item.dates || item.role || item.location || item.bullets.length,
+          item.company ||
+          item.dates ||
+          item.role ||
+          item.location ||
+          item.bullets.length,
       );
 
     if (explicitExperience.length) {
@@ -439,7 +454,9 @@ ${bulletList}`;
         stack: this.clean(project.stack || skills.slice(0, 4).join(', ')),
         bullets: this.cleanArray(project.bullets),
       }))
-      .filter((project) => project.name || project.stack || project.bullets.length);
+      .filter(
+        (project) => project.name || project.stack || project.bullets.length,
+      );
   }
 
   private renderProjectSection(project: {
@@ -460,7 +477,9 @@ ${bulletList}`;
   }
 
   private buildCertificates(dto: RenderResumeDto): string[] {
-    const explicitCertificates = this.cleanArray((dto.resume || {}).certificates);
+    const explicitCertificates = this.cleanArray(
+      (dto.resume || {}).certificates,
+    );
     if (explicitCertificates.length) {
       return explicitCertificates;
     }
@@ -557,9 +576,33 @@ ${bulletList}`;
       'Rabbit',
       'NATS',
     ]).slice(0, 9);
-    const frontend = has(['React', 'Next', 'JavaScript', 'HTML', 'CSS', 'Tailwind', 'State']).slice(0, 7);
-    const databases = has(['PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Elasticsearch', 'SQL']).slice(0, 7);
-    const devops = has(['Docker', 'Kubernetes', 'CI/CD', 'GitHub Actions', 'GitLab', 'Linux', 'Observability', 'Grafana']).slice(0, 8);
+    const frontend = has([
+      'React',
+      'Next',
+      'JavaScript',
+      'HTML',
+      'CSS',
+      'Tailwind',
+      'State',
+    ]).slice(0, 7);
+    const databases = has([
+      'PostgreSQL',
+      'MySQL',
+      'MongoDB',
+      'Redis',
+      'Elasticsearch',
+      'SQL',
+    ]).slice(0, 7);
+    const devops = has([
+      'Docker',
+      'Kubernetes',
+      'CI/CD',
+      'GitHub Actions',
+      'GitLab',
+      'Linux',
+      'Observability',
+      'Grafana',
+    ]).slice(0, 8);
     const cloud = has([
       'AWS',
       'GCP',
@@ -571,7 +614,15 @@ ${bulletList}`;
       'Cloud Run',
       'Oracle Cloud',
     ]).slice(0, 8);
-    const ai = has(['OpenAI', 'LangChain', 'LLM', 'AI', 'Vector', 'RAG', 'Prompt']).slice(0, 7);
+    const ai = has([
+      'OpenAI',
+      'LangChain',
+      'LLM',
+      'AI',
+      'Vector',
+      'RAG',
+      'Prompt',
+    ]).slice(0, 7);
 
     return {
       backend,
@@ -596,7 +647,7 @@ ${bulletList}`;
   }
 
   private escape(value?: string): string {
-    return this.transliterate(value || '')
+    return (value || '')
       .replace(/\\/g, '\\textbackslash{}')
       .replace(/&/g, '\\&')
       .replace(/%/g, '\\%')
@@ -607,45 +658,6 @@ ${bulletList}`;
       .replace(/}/g, '\\}')
       .replace(/~/g, '\\textasciitilde{}')
       .replace(/\^/g, '\\textasciicircum{}');
-  }
-
-  private transliterate(value: string): string {
-    const map: Record<string, string> = {
-      'А': 'A', 'а': 'a',
-      'Б': 'B', 'б': 'b',
-      'В': 'V', 'в': 'v',
-      'Г': 'G', 'г': 'g',
-      'Д': 'D', 'д': 'd',
-      'Е': 'E', 'е': 'e',
-      'Ё': 'Yo', 'ё': 'yo',
-      'Ж': 'Zh', 'ж': 'zh',
-      'З': 'Z', 'з': 'z',
-      'И': 'I', 'и': 'i',
-      'Й': 'Y', 'й': 'y',
-      'К': 'K', 'к': 'k',
-      'Л': 'L', 'л': 'l',
-      'М': 'M', 'м': 'm',
-      'Н': 'N', 'н': 'n',
-      'О': 'O', 'о': 'o',
-      'П': 'P', 'п': 'p',
-      'Р': 'R', 'р': 'r',
-      'С': 'S', 'с': 's',
-      'Т': 'T', 'т': 't',
-      'У': 'U', 'у': 'u',
-      'Ф': 'F', 'ф': 'f',
-      'Х': 'Kh', 'х': 'kh',
-      'Ц': 'Ts', 'ц': 'ts',
-      'Ч': 'Ch', 'ч': 'ch',
-      'Ш': 'Sh', 'ш': 'sh',
-      'Щ': 'Shch', 'щ': 'shch',
-      'Ъ': '', 'ъ': '',
-      'Ы': 'Y', 'ы': 'y',
-      'Ь': '', 'ь': '',
-      'Э': 'E', 'э': 'e',
-      'Ю': 'Yu', 'ю': 'yu',
-      'Я': 'Ya', 'я': 'ya',
-    };
-    return value.replace(/[Ѐ-ӿ]/g, (ch) => map[ch] ?? ch);
   }
 
   private safeUrl(value?: string): string {

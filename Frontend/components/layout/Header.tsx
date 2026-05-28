@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sparkles } from 'lucide-react';
 import type { LanguageCode } from '../../i18n/languages';
 import { getTranslations } from '../../i18n/ui';
@@ -27,9 +26,7 @@ export default function Header({ savedResumesCount, lang, onSetLang }: Props) {
                 NestJS + Zustand
               </span>
             </h1>
-            <p className="text-xs text-secondary">
-              {t.header.subtitle}
-            </p>
+            <p className="text-xs text-secondary">{t.header.subtitle}</p>
           </div>
         </div>
 

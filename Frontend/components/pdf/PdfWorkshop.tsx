@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Download,
   Eye,
@@ -151,9 +145,7 @@ export default function ResumePdfWorkshop({
             <FileCode2 size={18} />
             LaTeX Workshop
           </h2>
-          <p className="text-xs text-secondary mt-1">
-            {t.pdf.intro}
-          </p>
+          <p className="text-xs text-secondary mt-1">{t.pdf.intro}</p>
         </div>
 
         <button
@@ -240,11 +232,11 @@ export default function ResumePdfWorkshop({
           <div className="h-full flex flex-col">
             <div className="pdf-toolbar">
               <span className="text-[11px] text-secondary font-mono">
-                akhmad-akhmedov-resume.pdf
+                akhmad-resume.pdf
               </span>
               <a
                 href={pdfUrl}
-                download="akhmad-akhmedov-resume.pdf"
+                download="akhmad-resume.pdf"
                 className="btn-pdf-download"
               >
                 <Download size={12} />
@@ -267,9 +259,7 @@ export default function ResumePdfWorkshop({
           <div className="min-h-[360px] flex flex-col items-center justify-center text-center p-8">
             <FileCode2 size={42} className="text-cyan-500/40 mb-3" />
             <h3 className="text-sm font-bold text-body mb-1">
-              {isRendering
-                ? t.pdf.rendering
-                : t.pdf.emptyTitle}
+              {isRendering ? t.pdf.rendering : t.pdf.emptyTitle}
             </h3>
             <p className="text-xs text-muted max-w-md">
               {t.pdf.emptyDescription}

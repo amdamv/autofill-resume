@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { useResumeStore } from '../../store/index';
 import { MOCK_JOBS } from '../../data/mockJobs';
-import {
-  Puzzle,
-  Sparkles,
-  Wand2,
-  Trash2,
-  CheckCircle2,
-} from 'lucide-react';
+import { Puzzle, Sparkles, Wand2, Trash2, CheckCircle2 } from 'lucide-react';
+import type { LanguageCode } from '../../i18n/languages';
+import { getTranslations } from '../../i18n/ui';
 
-export default function ExtensionSimulator() {
+export default function ExtensionSimulator({ lang = 'ru' }: { lang?: LanguageCode }) {
   const {
     profile,
     customFields,
@@ -40,6 +36,8 @@ export default function ExtensionSimulator() {
 
   const activeJob =
     MOCK_JOBS.find((j) => j.id === selectedJobId) || MOCK_JOBS[0];
+  const t = getTranslations(lang);
+  const ext = t.extension;
 
   const handleAddCustomField = () => {
     if (!newFieldKey.trim() || !newFieldValue.trim()) return;
@@ -57,13 +55,8 @@ export default function ExtensionSimulator() {
 
   return (
     <div className="h-full flex flex-col xl:flex-row gap-6 pb-12">
-<<<<<<< HEAD
       {/* LEFT PORTION: THE SIMULATED HIRING WEB PORTAL (HH.RU MOCKUP) */}
       <div className="flex-grow xl:w-2/3 bg-header border border-default rounded-2xl overflow-hidden flex flex-col shadow-2xl">
-=======
-      {/* LEFT PORTION: THE SIMULATED HIRING WEB PORTAL (MOCKUP) */}
-      <div className="flex-grow xl:w-2/3 bg-[#0d0e14] border border-[#20253f] rounded-2xl overflow-hidden flex flex-col shadow-2xl">
->>>>>>> 486d8ed (refactor: enhance UI components and improve styling consistency in ExtensionSimulator)
         {/* Browser Mockbar Header */}
         <div className="bg-panel px-4 py-3 border-b border-default/75 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -90,7 +83,7 @@ export default function ExtensionSimulator() {
         <div className="bg-panel px-5 py-3 border-b border-default/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-xs text-secondary font-display">
-              Текущая открытая вакансия на странице:
+              {ext.currentVacancy}
             </span>
             <select
               value={selectedJobId}
@@ -113,11 +106,12 @@ export default function ExtensionSimulator() {
         {/* Page Inner Container (Divided into Vacancy Details & Candidate Apply Form) */}
         <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-default flex-grow overflow-y-auto">
           {/* Visual Vacancy Description left sub column */}
-          <div className="p-6 space-y-4" style={{ backgroundColor: 'rgba(9, 11, 20, 0.4)' }}>
+          <div
+            className="p-6 space-y-4"
+            style={{ backgroundColor: 'rgba(9, 11, 20, 0.4)' }}
+          >
             <div className="border-b border-default pb-3">
-              <span className="text-[10px] font-bold text-indigo-400 font-mono tracking-wider uppercase">
-                ✦ Детали вакансии на странице
-              </span>
+              <span className="text-[10px] font-bold text-indigo-400 font-mono tracking-wider uppercase">{ext.vacancyDetails}</span>
               <h2 className="text-xl font-bold font-display text-white mt-1">
                 {activeJob.role}
               </h2>
@@ -131,7 +125,7 @@ export default function ExtensionSimulator() {
 
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-secondary">
-                Полные требования рекламодателя:
+                {ext.fullRequirements}
               </h3>
               <div className="bg-surface-deep p-4 rounded-xl border border-default text-xs text-body leading-relaxed max-h-[340px] overflow-y-auto whitespace-pre-line font-light">
                 {activeJob.description}
@@ -144,32 +138,27 @@ export default function ExtensionSimulator() {
                 className="text-emerald-400 flex-shrink-0 mt-0.5 animate-pulse"
               />
               <p className="text-[11px] text-secondary leading-normal">
-                Команда JobFill считывает данные из этого левого блока напрямую.
-                Кликните на{' '}
-                <strong className="text-emerald-300">
-                  "Считать DOM & Адаптировать"
-                </strong>{' '}
-                в правой панели, чтобы сымитировать считывание HTML-контента!
+                {ext.jobFillHint}
               </p>
             </div>
           </div>
 
           {/* Interactive fields to receive autofilled values */}
-          <div className="p-6 space-y-4" style={{ backgroundColor: 'rgba(9, 11, 20, 0.15)' }}>
+          <div
+            className="p-6 space-y-4"
+            style={{ backgroundColor: 'rgba(9, 11, 20, 0.15)' }}
+          >
             <div className="border-b border-default pb-3 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold font-display text-white flex items-center gap-1.5">
-                  📥 Форма Отклика Работодателя
+                  📥 {ext.formTitle}
                 </h2>
                 <p className="text-[11px] text-secondary">
-                  Поля получат инъекцию при клике по автозаполнению.
+                  {ext.formHint}
                 </p>
               </div>
-              <button
-                onClick={clearWebForm}
-                className="btn-clear-small"
-              >
-                Очистить
+              <button onClick={clearWebForm} className="btn-clear-small">
+                {ext.clear}
               </button>
             </div>
 
@@ -177,13 +166,13 @@ export default function ExtensionSimulator() {
               {/* Name field */}
               <div>
                 <label className="text-secondary font-medium block mb-1">
-                  ФИО Соискателя
+                  {ext.labelName}
                 </label>
                 <input
                   type="text"
                   value={webFormFields.fullName}
                   onChange={(e) => setWebFormField('fullName', e.target.value)}
-                  placeholder="Akhmad Akhmedov"
+                  placeholder={ext.placeholderName}
                   className={`ext-input ${
                     showFormHighlight && webFormFields.fullName
                       ? 'ext-input--highlighted'
@@ -196,13 +185,13 @@ export default function ExtensionSimulator() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-secondary font-medium block mb-1">
-                    Эл. почта
+                    {ext.labelEmail}
                   </label>
                   <input
                     type="email"
                     value={webFormFields.email}
                     onChange={(e) => setWebFormField('email', e.target.value)}
-                    placeholder="email@example.com"
+                    placeholder={ext.placeholderEmail}
                     className={`ext-input ${
                       showFormHighlight && webFormFields.email
                         ? 'ext-input--highlighted'
@@ -212,13 +201,13 @@ export default function ExtensionSimulator() {
                 </div>
                 <div>
                   <label className="text-secondary font-medium block mb-1">
-                    Телефон
+                    {ext.labelPhone}
                   </label>
                   <input
                     type="text"
                     value={webFormFields.phone}
                     onChange={(e) => setWebFormField('phone', e.target.value)}
-                    placeholder="+1 (234) 123-45-67"
+                    placeholder={ext.placeholderPhone}
                     className={`ext-input ${
                       showFormHighlight && webFormFields.phone
                         ? 'ext-input--highlighted'
@@ -231,13 +220,13 @@ export default function ExtensionSimulator() {
               {/* Skills matching */}
               <div>
                 <label className="text-secondary font-medium block mb-1">
-                  Релевантные навыки (ИИ Адаптация)
+                  {ext.labelSkills}
                 </label>
                 <input
                   type="text"
                   value={webFormFields.skills}
                   onChange={(e) => setWebFormField('skills', e.target.value)}
-                  placeholder="TypeScript, React, Node.js..."
+                  placeholder={ext.placeholderSkills}
                   className={`ext-input ${
                     showFormHighlight && webFormFields.skills
                       ? 'ext-input--highlighted'
@@ -250,7 +239,7 @@ export default function ExtensionSimulator() {
               <div className="ext-card">
                 <div>
                   <label className="text-secondary font-medium block mb-1 text-[11px]">
-                    GitHub Ссылка
+                    {ext.labelGitHub}
                   </label>
                   <input
                     type="text"
@@ -258,7 +247,7 @@ export default function ExtensionSimulator() {
                     onChange={(e) =>
                       setWebFormField('githubUrl', e.target.value)
                     }
-                    placeholder="https://github.com/..."
+                    placeholder={ext.placeholderGitHub}
                     className={`ext-input-compact ${
                       showFormHighlight && webFormFields.githubUrl
                         ? 'ext-input-compact--highlighted'
@@ -268,7 +257,7 @@ export default function ExtensionSimulator() {
                 </div>
                 <div>
                   <label className="text-secondary font-medium block mb-1 text-[11px]">
-                    Личный Сайт / Портфолио
+                    {ext.labelPortfolio}
                   </label>
                   <input
                     type="text"
@@ -276,7 +265,7 @@ export default function ExtensionSimulator() {
                     onChange={(e) =>
                       setWebFormField('portfolioUrl', e.target.value)
                     }
-                    placeholder="https://..."
+                    placeholder={ext.placeholderPortfolio}
                     className={`ext-input-compact ${
                       showFormHighlight && webFormFields.portfolioUrl
                         ? 'ext-input-compact--highlighted'
@@ -290,7 +279,7 @@ export default function ExtensionSimulator() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-secondary font-medium block mb-1">
-                    Желаемый Доход
+                    {ext.labelSalary}
                   </label>
                   <input
                     type="text"
@@ -298,7 +287,7 @@ export default function ExtensionSimulator() {
                     onChange={(e) =>
                       setWebFormField('expectedSalary', e.target.value)
                     }
-                    placeholder="1000,000$"
+                    placeholder={ext.placeholderSalary}
                     className={`ext-input ${
                       showFormHighlight && webFormFields.expectedSalary
                         ? 'ext-input--highlighted'
@@ -308,7 +297,7 @@ export default function ExtensionSimulator() {
                 </div>
                 <div>
                   <label className="text-secondary font-medium block mb-1">
-                    Срок возможного начала работы
+                    {ext.labelStartDate}
                   </label>
                   <input
                     type="text"
@@ -316,7 +305,7 @@ export default function ExtensionSimulator() {
                     onChange={(e) =>
                       setWebFormField('customNotice', e.target.value)
                     }
-                    placeholder="Через 2 недели"
+                    placeholder={ext.placeholderStartDate}
                     className={`ext-input ${
                       showFormHighlight && webFormFields.customNotice
                         ? 'ext-input--highlighted'
@@ -329,14 +318,14 @@ export default function ExtensionSimulator() {
               {/* Achievements / Experiences */}
               <div>
                 <label className="text-secondary font-medium block mb-1">
-                  Адаптированные ключевые достижения (в рамках резюме)
+                  {ext.labelAchievements}
                 </label>
                 <textarea
                   value={webFormFields.achievements}
                   onChange={(e) =>
                     setWebFormField('achievements', e.target.value)
                   }
-                  placeholder="Специфика опыта под вакансию..."
+                  placeholder={ext.placeholderAchievements}
                   rows={3}
                   className={`ext-input text-xs font-sans resize-none ${
                     showFormHighlight && webFormFields.achievements
@@ -349,14 +338,14 @@ export default function ExtensionSimulator() {
               {/* Cover Letter message */}
               <div>
                 <label className="text-secondary font-medium block mb-1 text-indigo-400">
-                  Сопроводительное ИИ-Письмо (Intro Outreach Message)
+                  {ext.labelCoverLetter}
                 </label>
                 <textarea
                   value={webFormFields.coverLetter}
                   onChange={(e) =>
                     setWebFormField('coverLetter', e.target.value)
                   }
-                  placeholder="Персональное приветствие рекрутеру на базе описания вакансии..."
+                  placeholder={ext.placeholderCoverLetter}
                   rows={3}
                   className={`ext-input resize-none ${
                     showFormHighlight && webFormFields.coverLetter
@@ -406,7 +395,7 @@ export default function ExtensionSimulator() {
                 : 'ext-tab--inactive'
             }`}
           >
-            🔌 Автозаполнение
+            🔌 {ext.extAutofill}
           </button>
           <button
             onClick={() => setActiveExtensionSection('my-data')}
@@ -416,7 +405,7 @@ export default function ExtensionSimulator() {
                 : 'ext-tab--inactive'
             }`}
           >
-            📋 Пополнить данные ({customFields.length})
+            📋 {ext.extMyData} ({customFields.length})
           </button>
         </div>
 
@@ -429,16 +418,15 @@ export default function ExtensionSimulator() {
               <div className="ext-card p-3 text-center space-y-2.5">
                 <div>
                   <span className="text-[10px] text-indigo-400 font-bold block tracking-widest uppercase">
-                    JobFill Smart Agent
+                    {ext.extSmartAgent}
                   </span>
                   <p className="text-[11px] text-secondary mt-1 max-w-xs mx-auto">
-                    Сканирует текст открытой вакансии слева, активирует Claude и
-                    готовит CV за секунду.
+                    {ext.extAgentDesc}
                   </p>
                 </div>
 
                 <button
-                  onClick={scanVacancyAndGenerate}
+                  onClick={() => scanVacancyAndGenerate(lang)}
                   disabled={isScanning}
                   className={`btn-gradient-indigo w-full ${
                     isScanning ? 'opacity-75 cursor-not-allowed' : ''
@@ -446,8 +434,8 @@ export default function ExtensionSimulator() {
                 >
                   <Sparkles size={13} className="text-white glow-animation" />
                   {isScanning
-                    ? 'Считывание DOM...'
-                    : 'Считать DOM & Адаптировать'}
+                    ? ext.scanning
+                    : ext.scanDom}
                 </button>
 
                 {scanStatusStep && (
@@ -465,7 +453,7 @@ export default function ExtensionSimulator() {
                   <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold text-emerald-400 block uppercase tracking-wider">
-                        ✔ РЕЗЮМЕ & MESSAGE ГОТОВЫ!
+                        {ext.extResumeReady}
                       </span>
                       <span className="text-[9px] text-muted font-mono">
                         1 клик
@@ -474,7 +462,7 @@ export default function ExtensionSimulator() {
 
                     <div>
                       <span className="text-[9px] text-muted font-semibold block">
-                        О себе:
+                        {ext.extAbout}
                       </span>
                       <p className="text-[10px] text-body leading-normal line-clamp-2 bg-surface-deep p-1.5 rounded border border-default italic">
                         {scannedResume.summary}
@@ -484,7 +472,7 @@ export default function ExtensionSimulator() {
                     <div>
                       <div className="flex justify-between items-center mb-0.5">
                         <span className="text-[9px] text-muted font-semibold">
-                          Сопроводительное сообщение:
+                          {ext.extCoverLetter}
                         </span>
                         <button
                           onClick={() =>
@@ -493,8 +481,8 @@ export default function ExtensionSimulator() {
                           className="text-[9px] text-emerald-300 hover:text-emerald-100 flex items-center gap-0.5 font-bold"
                         >
                           {copiedField === 'cov-ext'
-                            ? 'Скопировано!'
-                            : 'Копировать'}
+                            ? ext.extCopied
+                            : ext.extCopy}
                         </button>
                       </div>
                       <p className="text-[10px] text-body leading-normal line-clamp-2 bg-surface-deep p-1.5 rounded border border-default italic">
@@ -517,8 +505,8 @@ export default function ExtensionSimulator() {
                         className="text-slate-950 glow-animation animate-bounce"
                       />
                       {isInjecting
-                        ? 'Вставляем ячейки...'
-                        : 'Вставить во все поля формы (JobFill)'}
+                        ? ext.extFilling
+                        : ext.extInject}
                     </button>
 
                     {injectStep && (
@@ -535,14 +523,10 @@ export default function ExtensionSimulator() {
                     className="mx-auto text-muted animate-pulse"
                   />
                   <p className="font-semibold text-secondary">
-                    Резюме еще не адаптировано
+                    {ext.extNotReadyTitle}
                   </p>
                   <p className="text-[10px] text-muted leading-normal">
-                    Нажмите{' '}
-                    <strong className="text-indigo-400">
-                      "Считать DOM & Адаптировать"
-                    </strong>{' '}
-                    выше. Расширение прочитает требования и подготовит файлы.
+                    {ext.extNotReadyDesc}
                   </p>
                 </div>
               )}
@@ -550,23 +534,23 @@ export default function ExtensionSimulator() {
               {/* Active Synced Candidate Details */}
               <div className="bg-panel/80 rounded-xl p-3 border border-default space-y-2">
                 <span className="text-[10px] font-bold text-muted uppercase tracking-widest block">
-                  Текущий Профиль в приложении:
+                  {ext.extCurrentProfile}
                 </span>
                 <div className="text-[11px] text-body space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-muted">ФИО:</span>
+                    <span className="text-muted">{ext.extName}</span>
                     <span className="font-medium truncate max-w-[150px]">
                       {profile.name}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted">Должность:</span>
+                    <span className="text-muted">{ext.extTitle}</span>
                     <span className="text-emerald-400 font-mono truncate max-w-[150px]">
                       {profile.title}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted">Контакты:</span>
+                    <span className="text-muted">{ext.extContact}</span>
                     <span className="text-indigo-300 font-mono truncate max-w-[150px]">
                       {profile.email}
                     </span>
@@ -582,26 +566,23 @@ export default function ExtensionSimulator() {
               <div className="ext-info-card">
                 <h4 className="text-[11px] font-bold text-emerald-400 mb-1 flex items-center gap-1">
                   <CheckCircle2 size={12} />
-                  Пополнить данные приложения
+                  {ext.extDataTitle}
                 </h4>
                 <p className="text-[10px] text-secondary leading-relaxed font-light">
-                  Здесь вы можете внести свои дополнительные персональные
-                  данные, ссылки на социальные сети, зарплаты или контактные
-                  данные, которые расширение мгновенно сможет вставлять в
-                  свободные ячейки заявок!
+                  {ext.extDataDesc}
                 </p>
               </div>
 
               {/* Add Custom Fields Mini Form */}
               <div className="bg-panel p-3 rounded-xl border border-default space-y-2">
                 <span className="text-[10px] font-bold text-indigo-300 uppercase block mb-1">
-                  ⊕ Добавить новое поле данных:
+                  {ext.extAddField}
                 </span>
 
                 <div className="space-y-2 text-xs">
                   <div>
                     <label className="text-[10px] text-muted block mb-0.5">
-                      Ключ поля (ID латиницей, например github, notice)
+                      {ext.extFieldKey}
                     </label>
                     <input
                       type="text"
@@ -614,7 +595,7 @@ export default function ExtensionSimulator() {
 
                   <div>
                     <label className="text-[10px] text-muted block mb-0.5">
-                      Читабельное название поля
+                      {ext.extFieldLabel}
                     </label>
                     <input
                       type="text"
@@ -627,13 +608,13 @@ export default function ExtensionSimulator() {
 
                   <div>
                     <label className="text-[10px] text-muted block mb-0.5">
-                      Значение поля
+                      {ext.extFieldValue}
                     </label>
                     <input
                       type="text"
                       value={newFieldValue}
                       onChange={(e) => setNewFieldValue(e.target.value)}
-                      placeholder="https://t.me/alex_webdev"
+                      placeholder="https://t.me/amdamv"
                       className="ext-input-raw text-emerald-300 font-mono"
                     />
                   </div>
@@ -642,7 +623,7 @@ export default function ExtensionSimulator() {
                     onClick={handleAddCustomField}
                     className="btn-indigo-solid"
                   >
-                    Внести в приложение
+                    {ext.extAddBtn}
                   </button>
                 </div>
               </div>
@@ -650,15 +631,12 @@ export default function ExtensionSimulator() {
               {/* Render dynamic Custom field list with deletes */}
               <div className="space-y-2">
                 <span className="text-[10px] font-bold text-secondary block uppercase tracking-wider">
-                  Текущие сбереженные данные ({customFields.length}):
+                  {ext.extSavedData(customFields.length)}
                 </span>
 
                 <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                   {customFields.map((field) => (
-                    <div
-                      key={field.key}
-                      className="ext-field-card"
-                    >
+                    <div key={field.key} className="ext-field-card">
                       <div className="truncate max-w-[190px]">
                         <span className="text-[10px] text-muted font-bold uppercase block leading-tight">
                           {field.label}
@@ -671,7 +649,7 @@ export default function ExtensionSimulator() {
                       <button
                         onClick={() => removeCustomField(field.key)}
                         className="btn-destructive p-1 rounded hover:bg-red-500/5 transition-colors"
-                        title="Удалить это поле"
+                        title={ext.extDelete}
                       >
                         <Trash2 size={11} />
                       </button>
