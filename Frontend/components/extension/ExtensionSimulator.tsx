@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { useResumeStore } from '../../store/index';
 import { MOCK_JOBS } from '../../data/mockJobs';
-import {
-  Puzzle,
-  Sparkles,
-  Wand2,
-  Trash2,
-  CheckCircle2,
-} from 'lucide-react';
+import { Puzzle, Sparkles, Wand2, Trash2, CheckCircle2 } from 'lucide-react';
 
 export default function ExtensionSimulator() {
   const {
@@ -57,13 +51,8 @@ export default function ExtensionSimulator() {
 
   return (
     <div className="h-full flex flex-col xl:flex-row gap-6 pb-12">
-<<<<<<< HEAD
       {/* LEFT PORTION: THE SIMULATED HIRING WEB PORTAL (HH.RU MOCKUP) */}
       <div className="flex-grow xl:w-2/3 bg-header border border-default rounded-2xl overflow-hidden flex flex-col shadow-2xl">
-=======
-      {/* LEFT PORTION: THE SIMULATED HIRING WEB PORTAL (MOCKUP) */}
-      <div className="flex-grow xl:w-2/3 bg-[#0d0e14] border border-[#20253f] rounded-2xl overflow-hidden flex flex-col shadow-2xl">
->>>>>>> 486d8ed (refactor: enhance UI components and improve styling consistency in ExtensionSimulator)
         {/* Browser Mockbar Header */}
         <div className="bg-panel px-4 py-3 border-b border-default/75 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -113,7 +102,10 @@ export default function ExtensionSimulator() {
         {/* Page Inner Container (Divided into Vacancy Details & Candidate Apply Form) */}
         <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-default flex-grow overflow-y-auto">
           {/* Visual Vacancy Description left sub column */}
-          <div className="p-6 space-y-4" style={{ backgroundColor: 'rgba(9, 11, 20, 0.4)' }}>
+          <div
+            className="p-6 space-y-4"
+            style={{ backgroundColor: 'rgba(9, 11, 20, 0.4)' }}
+          >
             <div className="border-b border-default pb-3">
               <span className="text-[10px] font-bold text-indigo-400 font-mono tracking-wider uppercase">
                 ✦ Детали вакансии на странице
@@ -155,7 +147,10 @@ export default function ExtensionSimulator() {
           </div>
 
           {/* Interactive fields to receive autofilled values */}
-          <div className="p-6 space-y-4" style={{ backgroundColor: 'rgba(9, 11, 20, 0.15)' }}>
+          <div
+            className="p-6 space-y-4"
+            style={{ backgroundColor: 'rgba(9, 11, 20, 0.15)' }}
+          >
             <div className="border-b border-default pb-3 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold font-display text-white flex items-center gap-1.5">
@@ -165,10 +160,7 @@ export default function ExtensionSimulator() {
                   Поля получат инъекцию при клике по автозаполнению.
                 </p>
               </div>
-              <button
-                onClick={clearWebForm}
-                className="btn-clear-small"
-              >
+              <button onClick={clearWebForm} className="btn-clear-small">
                 Очистить
               </button>
             </div>
@@ -633,7 +625,7 @@ export default function ExtensionSimulator() {
                       type="text"
                       value={newFieldValue}
                       onChange={(e) => setNewFieldValue(e.target.value)}
-                      placeholder="https://t.me/alex_webdev"
+                      placeholder="https://t.me/amdamv"
                       className="ext-input-raw text-emerald-300 font-mono"
                     />
                   </div>
@@ -655,10 +647,7 @@ export default function ExtensionSimulator() {
 
                 <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                   {customFields.map((field) => (
-                    <div
-                      key={field.key}
-                      className="ext-field-card"
-                    >
+                    <div key={field.key} className="ext-field-card">
                       <div className="truncate max-w-[190px]">
                         <span className="text-[10px] text-muted font-bold uppercase block leading-tight">
                           {field.label}

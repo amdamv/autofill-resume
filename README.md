@@ -17,7 +17,7 @@ AI-powered resume workspace for tailoring CV content to job descriptions, previe
 - Zustand
 - NestJS
 - Claude API via `@anthropic-ai/sdk`
-- LaTeX PDF rendering via `pdflatex`
+- LaTeX PDF rendering via `xelatex`
 
 ## Setup
 
@@ -51,5 +51,5 @@ npm run lint     # TypeScript check
 ## Notes
 
 - Keep API keys only in `.env`.
-- PDF generation requires a local LaTeX installation with `pdflatex`.
+- PDF generation requires a local LaTeX installation with `xelatex`.
 - Default PDF template is the FAANG-style ATS-friendly resume in the LaTeX Workshop.

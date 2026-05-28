@@ -6,88 +6,13 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
-import type { Tool, ToolUseBlock } from '@anthropic-ai/sdk/resources/messages';
+import type { ToolUseBlock } from '@anthropic-ai/sdk/resources/messages';
 import { GenerateResumeDto } from './dto/generate-resume.dto';
 import { getResumeTargetLanguageName } from './languages';
-
-type ExperienceEntry = {
-  company: string;
-  position: string;
-  dates: string;
-  location: string;
-  bullets: string[];
-};
-
-type TailoredResume = {
-  summary: string;
-  highlightedSkills: string[];
-  tailoredBullets: string[];
-  coverLetter: string;
-  experienceEntries?: ExperienceEntry[];
-};
-
-const sanitizeInput = (value: unknown, maxLength = 4000): string => {
-  if (typeof value !== 'string') {
-    return 'N/A';
-  }
-
-  return value
-    .slice(0, maxLength)
-    .replace(/[{}<>]/g, '')
-    .trim();
-};
-
-const tailoredResumeSchema: Tool.InputSchema = {
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    summary: {
-      type: 'string',
-      description:
-        'A professional profile summary tailored for this job, 3-4 lines maximum. Suitable for the "About Me" section.',
-    },
-    highlightedSkills: {
-      type: 'array',
-      items: { type: 'string' },
-      description:
-        'List of exactly 8 key skills matching this job posting, ranked by relevance.',
-    },
-    tailoredBullets: {
-      type: 'array',
-      items: { type: 'string' },
-      description:
-        '4-5 professional achievement bullet points for the work experience section. Incorporate language from the job description and metrics if possible.',
-    },
-    coverLetter: {
-      type: 'string',
-      description:
-        'A highly short, engaging cover letter or recruiter introductory message (max 120 words).',
-    },
-    experienceEntries: {
-      type: 'array',
-      description:
-        "Optional: improved version of the candidate's work experience entries with polished bullets tailored to the job. Keep the same companies and positions, just improve the bullet wording and add relevant tech stack keywords.",
-      items: {
-        type: 'object',
-        additionalProperties: false,
-        properties: {
-          company: { type: 'string' },
-          position: { type: 'string' },
-          dates: { type: 'string' },
-          location: { type: 'string' },
-          bullets: {
-            type: 'array',
-            items: { type: 'string' },
-            description:
-              "Improved achievement bullets for this role. Keep realistic — don't fabricate fake metrics, but improve wording and add relevant tech keywords from the job posting.",
-          },
-        },
-        required: ['company', 'position', 'dates', 'location', 'bullets'],
-      },
-    },
-  },
-  required: ['summary', 'highlightedSkills', 'tailoredBullets', 'coverLetter'],
-};
+import { TailoredResume } from './types/resume-types';
+import { tailoredResumeSchema } from './schemas/tailored-resume.schema';
+import { sanitizeInput } from './utils/sanitize-input';
+import { buildTailoredResumePrompt } from './prompts/tailored-resume.prompt';
 
 @Injectable()
 export class ResumeService {
@@ -183,51 +108,18 @@ export class ResumeService {
     const sanitizedJobDescription = sanitizeInput(jobDescription, 8000);
     const targetLanguageName = getResumeTargetLanguageName(targetLanguage);
 
-    const prompt = `
-You are an elite career development AI coach and expert resume writer.
-Your goal is to perfectly tailor the candidate's profile to align with the provided Target Job Description.
-
-Candidate Profile Information:
-- Full Name: ${sanitizedProfile.name}
-- Professional Title: ${sanitizedProfile.title}
-- Contact Email: ${sanitizedProfile.email}
-- Contact Phone: ${sanitizedProfile.phone}
-- Core Skills: ${skillsStr}
-- Working Experience Summary: ${sanitizedProfile.experience}
-- Work History (Companies):
-${experienceEntriesStr}
-- Education Information: ${sanitizedProfile.education}
-
-Target Job Description:
-"""
-${sanitizedJobDescription}
-"""
-
-Target Language: ${targetLanguageName}
-
-Instructions:
-1. Translate and write ALL fields in the response schema using the target language above.
-2. Tailor the content perfectly: highlight overlapping skills, frame experiences using strong action verbs to meet the job description's goals.
-3. Be professional, direct, and convincing. Keep summaries ready for copy-pasting.
-4. IMPORTANT — Sound human, not AI-generated. Avoid these overused buzzwords and AI clichés:
-   - "Spearheaded", "Leveraged", "Utilized", "Dashboard", "Leverage synergies"
-   - "Demonstrated", "Proven track record", "Robust", "Streamline", "Optimize" (use sparingly)
-   - "Passionate", "Results-driven", "Detail-oriented", "Team player" (generic traits)
-   - "Harness", "Orchestrate", "Navigate", "Landscape", "Toolkit", "Holistic"
-   - Long lists of buzzwords strung together
-
-   Instead: write plainly and directly like a real professional would. Short sentences. Real impact.
-
-5. REWRITE raw or simple experience descriptions into professional achievement bullets. If the user wrote something basic like "worked on backend" or "fixed bugs", transform it into a specific, measurable, professional-sounding bullet point that a senior hiring manager would respect. But keep it believable — don't fabricate metrics.
-6. Every bullet point must feel like it was written by a human professional, not generated by an LLM.
-7. IMPORTANT — Also improve the candidate's Work History (Companies) entries:
-   - Rewrite each bullet to sound more professional and relevant to the target job
-   - Add relevant tech stack keywords from the job description naturally into the bullets (e.g., "Built REST API" → "Built REST API with NestJS and PostgreSQL")
-   - If a company has no bullets, suggest 2-3 realistic improvements based on the role
-   - Keep the same company names, positions, dates, and locations — only change the bullet wording
-   - Don't fabricate specific metrics, but do improve vague descriptions
-   - Return the improved entries in the "experienceEntries" field of the response schema
-`;
+    const prompt = buildTailoredResumePrompt({
+      name: sanitizedProfile.name,
+      title: sanitizedProfile.title,
+      email: sanitizedProfile.email,
+      phone: sanitizedProfile.phone,
+      skills: skillsStr,
+      experience: sanitizedProfile.experience,
+      experienceEntries: experienceEntriesStr,
+      education: sanitizedProfile.education,
+      jobDescription: sanitizedJobDescription,
+      targetLanguage: targetLanguageName,
+    });
 
     try {
       const response = await ai.messages.create({
