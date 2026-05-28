@@ -57,8 +57,13 @@ export default function ExtensionSimulator() {
 
   return (
     <div className="h-full flex flex-col xl:flex-row gap-6 pb-12">
+<<<<<<< HEAD
       {/* LEFT PORTION: THE SIMULATED HIRING WEB PORTAL (HH.RU MOCKUP) */}
       <div className="flex-grow xl:w-2/3 bg-header border border-default rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+=======
+      {/* LEFT PORTION: THE SIMULATED HIRING WEB PORTAL (MOCKUP) */}
+      <div className="flex-grow xl:w-2/3 bg-[#0d0e14] border border-[#20253f] rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+>>>>>>> 486d8ed (refactor: enhance UI components and improve styling consistency in ExtensionSimulator)
         {/* Browser Mockbar Header */}
         <div className="bg-panel px-4 py-3 border-b border-default/75 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
