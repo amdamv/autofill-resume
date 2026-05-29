@@ -154,10 +154,17 @@ export class LatexRendererService {
     );
     const skillGroups = this.groupSkills(skills);
     const projects = this.buildProjects(dto, skills);
-    const certificates = this.buildCertificates(dto);
+    const certificates = this.buildCertificates(dto, profile);
     const header = this.renderHeader(profile, title);
     const aboutSection = this.renderAboutSection(resume.summary);
-    const skillsSection = this.renderSkillsSection(skillGroups);
+    const portfolioCats = dto.portfolioCategorizedSkills?.length
+      ? dto.portfolioCategorizedSkills
+      : resume.categorizedSkills?.length
+        ? resume.categorizedSkills
+        : null;
+    const skillsSection = portfolioCats
+      ? this.renderCategorizedSkillsSection(portfolioCats)
+      : this.renderSkillsSection(skillGroups);
     const experienceSection = experienceSections.length
       ? String.raw`\section{Experience}
   \resumeSubHeadingListStart
@@ -320,7 +327,7 @@ ${certificatesSection}
     return String.raw`\begin{center}
 ${name ? `    {\\Huge \\scshape ${this.escape(name)}} \\\\ \\vspace{2pt}` : ''}
 ${jobTitle ? `    \\textbf{${this.escape(jobTitle)}} \\\\ \\vspace{3pt}` : ''}
-${contacts.length ? `    \\small\n${contactLines}` : ''}
+${contacts.length ? `    \\footnotesize\n${contactLines}` : ''}
     \vspace{-8pt}
 \end{center}`;
   }
@@ -353,6 +360,28 @@ ${contacts.length ? `    \\small\n${contactLines}` : ''}
       .map(
         (row) =>
           `    \\textbf{${row.label}:} ${this.escape(row.values.join(', '))}`,
+      )
+      .join(' \\\\\n');
+
+    if (!rows) return '';
+
+    return String.raw`\section{Skills}
+\begin{itemize}[leftmargin=0.15in, label={}, itemsep=1pt, topsep=1pt]
+  \small{\item{
+${rows}
+  }}
+\end{itemize}
+\vspace{-12pt}`;
+  }
+
+  private renderCategorizedSkillsSection(
+    categories: { category: string; skills: string[] }[],
+  ): string {
+    const rows = categories
+      .filter((cat) => cat.skills.length > 0)
+      .map(
+        (cat) =>
+          `    \\textbf{${this.escape(cat.category)}:} ${this.escape(cat.skills.join(', '))}`,
       )
       .join(' \\\\\n');
 
@@ -488,7 +517,18 @@ ${bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`).join('
 ${bulletList}`;
   }
 
-  private buildCertificates(dto: RenderResumeDto): string[] {
+  private buildCertificates(dto: RenderResumeDto, profile?: RenderResumeDto['profile']): string[] {
+    const p = profile as any;
+    const profileEntries = p?.certificateEntries;
+    if (profileEntries && Array.isArray(profileEntries) && profileEntries.length) {
+      return profileEntries
+        .filter((c: any) => this.clean(c.name))
+        .map((c: any) => {
+          const parts = [this.clean(c.name), this.clean(c.issuer), this.clean(c.date)].filter(Boolean);
+          return parts.join(', ');
+        });
+    }
+
     const explicitCertificates = this.cleanArray(
       (dto.resume || {}).certificates,
     );
@@ -567,83 +607,41 @@ ${bulletList}`;
   }
 
   private groupSkills(skills: string[]) {
-    const has = (keywords: string[]) =>
-      skills.filter((skill) =>
-        keywords.some((keyword) =>
-          skill.toLowerCase().includes(keyword.toLowerCase()),
-        ),
-      );
+    const categories = [
+      { key: 'backend', keywords: ['Node', 'TypeScript', 'Java', 'Python', 'Nest', 'Express', 'GraphQL', 'REST', 'Microservices', 'Kafka', 'Rabbit', 'NATS', 'Go', 'Rust', 'C#', 'PHP', 'Ruby'], max: 9 },
+      { key: 'frontend', keywords: ['React', 'Next', 'JavaScript', 'HTML', 'CSS', 'Tailwind', 'Redux', 'Vue', 'Angular', 'Svelte', 'Zustand'], max: 7 },
+      { key: 'databases', keywords: ['PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Elasticsearch', 'SQL', 'DynamoDB', 'Firebase', 'Cassandra'], max: 7 },
+      { key: 'devops', keywords: ['Docker', 'Kubernetes', 'CI/CD', 'GitHub Actions', 'GitLab', 'Linux', 'Observability', 'Grafana', 'Jenkins', 'Terraform', 'Ansible'], max: 8 },
+      { key: 'cloud', keywords: ['AWS', 'GCP', 'Azure', 'S3', 'Lambda', 'SQS', 'SNS', 'Cloud Run', 'Oracle Cloud', 'DigitalOcean', 'Heroku', 'Vercel'], max: 8 },
+      { key: 'ai', keywords: ['OpenAI', 'LangChain', 'LLM', 'Vector', 'RAG', 'Prompt', 'GenAI', 'Claude', 'Neural', 'TensorFlow', 'PyTorch'], max: 7 },
+    ];
 
-    const backend = has([
-      'Node',
-      'TypeScript',
-      'Java',
-      'Python',
-      'Nest',
-      'Express',
-      'GraphQL',
-      'REST',
-      'Microservices',
-      'Kafka',
-      'Rabbit',
-      'NATS',
-    ]).slice(0, 9);
-    const frontend = has([
-      'React',
-      'Next',
-      'JavaScript',
-      'HTML',
-      'CSS',
-      'Tailwind',
-      'State',
-    ]).slice(0, 7);
-    const databases = has([
-      'PostgreSQL',
-      'MySQL',
-      'MongoDB',
-      'Redis',
-      'Elasticsearch',
-      'SQL',
-    ]).slice(0, 7);
-    const devops = has([
-      'Docker',
-      'Kubernetes',
-      'CI/CD',
-      'GitHub Actions',
-      'GitLab',
-      'Linux',
-      'Observability',
-      'Grafana',
-    ]).slice(0, 8);
-    const cloud = has([
-      'AWS',
-      'GCP',
-      'Azure',
-      'S3',
-      'Lambda',
-      'SQS',
-      'SNS',
-      'Cloud Run',
-      'Oracle Cloud',
-    ]).slice(0, 8);
-    const ai = has([
-      'OpenAI',
-      'LangChain',
-      'LLM',
-      'AI',
-      'Vector',
-      'RAG',
-      'Prompt',
-    ]).slice(0, 7);
-
-    return {
-      backend,
-      frontend,
-      databases,
-      devops,
-      cloud,
-      ai,
+    const assigned = new Set<number>();
+    const result: Record<string, string[]> = {
+      backend: [],
+      frontend: [],
+      databases: [],
+      devops: [],
+      cloud: [],
+      ai: [],
+      other: [],
     };
+
+    for (const cat of categories) {
+      for (let i = 0; i < skills.length && result[cat.key].length < cat.max; i++) {
+        if (assigned.has(i)) continue;
+        if (cat.keywords.some((kw) => skills[i].toLowerCase().includes(kw.toLowerCase()))) {
+          result[cat.key].push(skills[i]);
+          assigned.add(i);
+        }
+      }
+    }
+
+    for (let i = 0; i < skills.length; i++) {
+      if (!assigned.has(i)) result.other.push(skills[i]);
+    }
+
+    return result;
   }
 
   private clean(value?: string | null): string {

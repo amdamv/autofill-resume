@@ -70,6 +70,15 @@ export class PdfCandidateProfileDto {
 
   @IsOptional()
   @IsArray()
+  @IsObject({ each: true })
+  certificateEntries?: Array<{
+    name: string;
+    issuer: string;
+    date?: string;
+  }>;
+
+  @IsOptional()
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PdfSocialLinkDto)
   socialLinks?: PdfSocialLinkDto[];
@@ -100,6 +109,10 @@ export class TailoredResumePdfDto {
   @IsArray()
   @IsString({ each: true })
   highlightedSkills?: string[];
+
+  @IsOptional()
+  @IsArray()
+  categorizedSkills?: { category: string; skills: string[] }[];
 
   @IsOptional()
   @IsArray()
@@ -146,6 +159,15 @@ export class RenderResumeDto {
   @ValidateNested()
   @Type(() => TailoredResumePdfDto)
   resume!: TailoredResumePdfDto;
+
+  @IsOptional()
+  @IsArray()
+  portfolioCategorizedSkills?: { category: string; skills: string[] }[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  portfolioCategoryOrder?: string[];
 
   @IsOptional()
   @IsString()

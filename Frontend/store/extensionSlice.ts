@@ -4,7 +4,7 @@ import type { StoreState } from './index';
 import type { LanguageCode } from '../i18n/languages';
 import { DEFAULT_LANGUAGE } from '../i18n/languages';
 import { MOCK_JOBS } from '../data/mockJobs';
-import { generateResume } from '../services/resume';
+import { generateResumeStream } from '../services/resume';
 
 interface CustomField {
   id: string;
@@ -73,13 +73,8 @@ export const createExtensionSlice: StateCreator<
   let highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   return {
-  selectedJobId: 'job-1',
-  customFields: [
-    { id: crypto.randomUUID(), key: 'github', label: 'GitHub Ссылка', value: 'https://github.com/amdamv' },
-    { id: crypto.randomUUID(), key: 'portfolio', label: 'Портфолио', value: 'https://amdamv' },
-    { id: crypto.randomUUID(), key: 'salary', label: 'Ожидаемая Зарплата', value: '3000$' },
-    { id: crypto.randomUUID(), key: 'noticePeriod', label: 'Срок выхода', value: 'Готов завтра' },
-  ],
+  selectedJobId: '',
+  customFields: [],
   webFormFields: initialWebFormFields,
   scannedResume: null,
   isScanning: false,
@@ -118,29 +113,24 @@ export const createExtensionSlice: StateCreator<
   scanVacancyAndGenerate: async (lang: LanguageCode = DEFAULT_LANGUAGE) => {
     if (get().isScanning) return;
 
-    set({
-      isScanning: true,
-      scanStatusStep: '1. Чтение HTML-кода страницы...',
-    });
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    set({ scanStatusStep: '2. Парсинг требований вакансии ИИ...' });
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    set({ scanStatusStep: '3. Сопоставление с вашим профилем...' });
+    set({ isScanning: true, scanStatusStep: 'Connecting to AI...' });
 
     const activeJob =
       MOCK_JOBS.find((j) => j.id === get().selectedJobId) || MOCK_JOBS[0];
 
     try {
-      const rawResult = await generateResume({
-        profile: get().profile,
-        jobDescription: activeJob.description,
-        targetLanguage: lang,
-      });
-
-      set({ scanStatusStep: '4. Финализация сопроводительного письма...' });
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const rawResult = await generateResumeStream(
+        {
+          profile: get().profile,
+          jobDescription: activeJob.description,
+          targetLanguage: lang,
+        },
+        (event) => {
+          if (event.type === 'progress' && event.data.message) {
+            set({ scanStatusStep: event.data.message });
+          }
+        },
+      );
 
       const newResume: TailoredResume = {
         id: 'jobfill-res-' + Date.now(),
@@ -152,6 +142,7 @@ export const createExtensionSlice: StateCreator<
         }),
         summary: rawResult.summary,
         highlightedSkills: rawResult.highlightedSkills,
+        categorizedSkills: rawResult.categorizedSkills,
         tailoredBullets: rawResult.tailoredBullets,
         coverLetter: rawResult.coverLetter,
       };

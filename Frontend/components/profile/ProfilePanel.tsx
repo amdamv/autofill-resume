@@ -10,6 +10,7 @@ import {
 import CompanyManager from './CompanyManager';
 import EducationManager from './EducationManager';
 import SocialLinksManager from './SocialLinksManager';
+import CertificateManager from './CertificateManager';
 import type { LanguageCode } from '../../i18n/languages';
 
 type Props = {
@@ -201,6 +202,9 @@ export default function ProfilePanel({ lang }: Props) {
 
         {/* Education */}
         <EducationManager lang={lang} />
+
+        {/* Certificates */}
+        <CertificateManager lang={lang} />
 
         {/* Experience Entries */}
         <CompanyManager lang={lang} />

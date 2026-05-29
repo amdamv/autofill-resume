@@ -15,6 +15,29 @@ export const tailoredResumeSchema: Tool.InputSchema = {
       description:
         'List of exactly 8 key skills matching this job posting, ranked by relevance.',
     },
+    categorizedSkills: {
+      type: 'array',
+      description:
+        'Skills organized into categories relevant to this job. Create 3-6 category groups based on the job requirements and tech stack. Each category should have 1-5 skills.',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          category: {
+            type: 'string',
+            description:
+              'A short category name like "Backend", "Frontend", "Databases", "Cloud", "AI/ML", "DevOps", or any relevant category based on the job posting.',
+          },
+          skills: {
+            type: 'array',
+            items: { type: 'string' },
+            description:
+              'Skills belonging to this category. Include skills from the candidate profile AND add relevant missing skills from the job description.',
+          },
+        },
+        required: ['category', 'skills'],
+      },
+    },
     tailoredBullets: {
       type: 'array',
       items: { type: 'string' },

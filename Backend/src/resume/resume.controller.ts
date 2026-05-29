@@ -30,6 +30,34 @@ export class ResumeController {
     return this.resumeService.generateTailoredResume(dto);
   }
 
+  @Post('stream')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  async generateResumeStream(
+    @Body() dto: GenerateResumeDto,
+    @Res() response: Response,
+  ) {
+    response.setHeader('Content-Type', 'text/event-stream');
+    response.setHeader('Cache-Control', 'no-cache');
+    response.setHeader('Connection', 'keep-alive');
+    response.setHeader('X-Accel-Buffering', 'no');
+
+    try {
+      await this.resumeService.generateTailoredResumeStream(dto, (event) => {
+        response.write(
+          `event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`,
+        );
+      });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Internal server error';
+      response.write(
+        `event: error\ndata: ${JSON.stringify({ message })}\n\n`,
+      );
+    }
+    response.end();
+  }
+
   @Post('render-pdf')
   @HttpCode(HttpStatus.OK)
   @UseGuards(ThrottlerGuard)

@@ -12,6 +12,7 @@ import {
 import { CandidateProfile, TailoredResume } from '../../types/index';
 import type { LanguageCode } from '../../i18n/languages';
 import { getTranslations } from '../../i18n/ui';
+import { useResumeStore } from '../../store/index';
 import {
   RESUME_FILTERS,
   RESUME_TEMPLATES,
@@ -36,6 +37,8 @@ export default function ResumePdfWorkshop({
   lang,
 }: Props) {
   const t = getTranslations(lang);
+  const portfolioCategorizedSkills = useResumeStore((s) => s.portfolioCategorizedSkills);
+  const portfolioCategoryOrder = useResumeStore((s) => s.portfolioCategoryOrder);
   const [templateId, setTemplateId] =
     useState<ResumeTemplateId>('akhmad-classic');
   const [filterId, setFilterId] = useState<ResumeFilterId>('source');
@@ -86,10 +89,12 @@ export default function ResumePdfWorkshop({
             ? profile.experienceEntries
             : activeResume?.experience,
       },
+      portfolioCategorizedSkills,
+      portfolioCategoryOrder,
       templateId,
       filterId,
     }),
-    [profile, activeResume, templateId, filterId],
+    [profile, activeResume, templateId, filterId, portfolioCategorizedSkills, portfolioCategoryOrder],
   );
 
   const renderPdf = useCallback(async () => {

@@ -22,6 +22,14 @@ export interface SocialLink {
   url: string;
 }
 
+export interface CertificateEntry {
+  id: string;
+  name: string;
+  issuer: string;
+  date?: string;
+  url?: string;
+}
+
 export interface CandidateProfile {
   name: string;
   title: string;
@@ -36,4 +44,5 @@ export interface CandidateProfile {
   experienceEntries?: ExperienceEntry[];
   educationEntries?: EducationEntry[];
   socialLinks?: SocialLink[];
+  certificateEntries?: CertificateEntry[];
 }

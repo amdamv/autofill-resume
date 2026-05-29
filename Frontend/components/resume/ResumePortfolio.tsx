@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   FileText,
   Code,
@@ -7,12 +7,40 @@ import {
   Plus,
   X,
   Sparkles,
+  Award,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useResumeStore } from '../../store/index';
 import CopyButton from '../shared/CopyButton';
 import type { LanguageCode } from '../../i18n/languages';
 
+const SKILL_CATEGORIES = [
+  { key: 'backend', label: 'Backend' },
+  { key: 'frontend', label: 'Frontend' },
+  { key: 'databases', label: 'Databases' },
+  { key: 'devops', label: 'DevOps' },
+  { key: 'cloud', label: 'Cloud' },
+  { key: 'ai', label: 'AI/LLM' },
+] as const;
+
+const CATEGORY_KEYWORDS: [string, string[]][] = [
+  ['backend', ['node','typescript','java','python','nest','express','graphql','rest','microservices','kafka','rabbit','nats','go','rust','c#','php','ruby']],
+  ['frontend', ['react','next','javascript','html','css','tailwind','redux','vue','angular','svelte','zustand']],
+  ['databases', ['postgresql','mysql','mongodb','redis','elasticsearch','sql','dynamodb','firebase','cassandra']],
+  ['devops', ['docker','kubernetes','ci/cd','github actions','gitlab','linux','observability','grafana','jenkins','terraform','ansible']],
+  ['cloud', ['aws','gcp','azure','s3','lambda','sqs','sns','cloud run','oracle cloud','digitalocean','heroku','vercel']],
+  ['ai', ['openai','langchain','llm','vector','rag','prompt','genai','claude','neural','tensorflow','pytorch']],
+];
+
+function categorizeSkill(skill: string): string {
+  const l = skill.toLowerCase();
+  for (const [cat, kws] of CATEGORY_KEYWORDS) {
+    if (kws.some((k) => l.includes(k))) return cat;
+  }
+  return 'backend';
+}
+
+type SkillEntry = { id: string; name: string; category: string };
 type Props = { lang: LanguageCode };
 
 export default function ResumePortfolio({ lang }: Props) {
@@ -21,10 +49,160 @@ export default function ResumePortfolio({ lang }: Props) {
   const activeResumeId = useResumeStore((s) => s.activeResumeId);
   const addResumeBullet = useResumeStore((s) => s.addResumeBullet);
   const removeResumeBullet = useResumeStore((s) => s.removeResumeBullet);
-
-  const [newBullet, setNewBullet] = useState('');
+  const syncPortfolioSkills = useResumeStore((s) => s.syncPortfolioSkills);
 
   const activeResume = savedResumes.find((r) => r.id === activeResumeId) || null;
+
+  const [newBullet, setNewBullet] = useState('');
+  const [editableSkills, setEditableSkills] = useState<SkillEntry[]>(() =>
+    (profile.skills ?? []).map((s) => ({ id: crypto.randomUUID(), name: s, category: categorizeSkill(s) }))
+  );
+  const [categoryOrder, setCategoryOrder] = useState<string[]>(
+    SKILL_CATEGORIES.map((c) => c.key),
+  );
+  const [categoryLabels, setCategoryLabels] = useState<Record<string, string>>({});
+  const [newCatName, setNewCatName] = useState('');
+  const [isAddingCat, setIsAddingCat] = useState(false);
+  const [dragInsertPos, setDragInsertPos] = useState<{ key: string; position: 'before' | 'after' } | null>(null);
+  const [editingCatKey, setEditingCatKey] = useState<string | null>(null);
+  const [editingCatValue, setEditingCatValue] = useState('');
+
+  const allCategories = categoryOrder.map((key) => {
+    const builtin = SKILL_CATEGORIES.find((c) => c.key === key);
+    return { key, label: categoryLabels[key] || builtin?.label || key };
+  });
+
+  // Keep in sync when profile skills change (user adds in ProfilePanel)
+  useEffect(() => {
+    setEditableSkills((prev) => {
+      const existing = new Map(prev.map((s) => [s.name.toLowerCase(), s]));
+      const updated: SkillEntry[] = [];
+      for (const name of profile.skills ?? []) {
+        const key = name.toLowerCase();
+        if (existing.has(key)) {
+          updated.push(existing.get(key)!);
+          existing.delete(key);
+        } else {
+          updated.push({ id: crypto.randomUUID(), name, category: categorizeSkill(name) });
+        }
+      }
+      // Keep any extra skills from AI or manual + adds
+      for (const entry of existing.values()) {
+        updated.push(entry);
+      }
+      return updated;
+    });
+  }, [profile.skills ?? []]);
+
+  // When AI generates a new resume, ADD new skills from the job (keep user edits & categories)
+  useEffect(() => {
+    if (!activeResume) return;
+
+    const cats = activeResume.categorizedSkills;
+    // Build AI skill→category map for new skills
+    const skillCats = new Map<string, string>();
+    // Normalize AI category labels to existing keys (e.g. "Backend" → "backend")
+    const labelToKey = new Map<string, string>();
+    for (const key of categoryOrder) {
+      const builtin = SKILL_CATEGORIES.find((c) => c.key === key);
+      const label = categoryLabels[key] || builtin?.label || key;
+      labelToKey.set(label.toLowerCase(), key);
+    }
+    if (cats?.length) {
+      for (const c of cats) {
+        for (const s of c.skills) {
+          skillCats.set(s.toLowerCase(), c.category);
+        }
+      }
+    }
+
+    // Only add skills that don't already exist — never override user's categories or order
+    setEditableSkills((prev) => {
+      const existing = new Map(prev.map((s) => [s.name.toLowerCase(), s]));
+      for (const name of activeResume.highlightedSkills) {
+        const key = name.toLowerCase();
+        if (!existing.has(key)) {
+          const aiCat = skillCats.get(key);
+          const normalizedCat = aiCat
+            ? (labelToKey.get(aiCat.toLowerCase()) || aiCat)
+            : categorizeSkill(name);
+          existing.set(key, {
+            id: crypto.randomUUID(),
+            name,
+            category: normalizedCat,
+          });
+        }
+      }
+      return [...existing.values()];
+    });
+  }, [activeResume?.id, categoryOrder, categoryLabels]);
+
+  // Sync portfolio skill state to store for PDF generation
+  useEffect(() => {
+    const grouped = categoryOrder
+      .map((catKey) => {
+        const builtin = SKILL_CATEGORIES.find((c) => c.key === catKey);
+        return {
+          category: categoryLabels[catKey] || builtin?.label || catKey,
+          skills: editableSkills
+            .filter((s) => s.category === catKey)
+            .map((s) => s.name),
+        };
+      })
+      .filter((c) => c.skills.length > 0);
+    syncPortfolioSkills(grouped, categoryOrder);
+  }, [editableSkills, categoryOrder, syncPortfolioSkills]);
+
+  const handleRemoveSkill = useCallback((id: string) => {
+    setEditableSkills((prev) => prev.filter((s) => s.id !== id));
+  }, []);
+
+  const handleMoveSkill = useCallback((id: string, category: string) => {
+    setEditableSkills((prev) => prev.map((s) => (s.id === id ? { ...s, category } : s)));
+  }, []);
+
+  const handleReorderCategory = useCallback((fromKey: string, toKey: string, position: 'before' | 'after' = 'before') => {
+    if (fromKey === toKey) return;
+    setCategoryOrder((prev) => {
+      const fromIdx = prev.indexOf(fromKey);
+      const toIdx = prev.indexOf(toKey);
+      if (fromIdx === -1 || toIdx === -1) return prev;
+      const next = [...prev];
+      next.splice(fromIdx, 1);
+      // After removal, toIdx may shift if fromKey was before toKey
+      const adjustedToIdx = toIdx > fromIdx ? toIdx - 1 : toIdx;
+      const insertAt = position === 'before' ? adjustedToIdx : adjustedToIdx + 1;
+      next.splice(insertAt, 0, fromKey);
+      return next;
+    });
+  }, []);
+
+  const handleStartRename = useCallback((key: string, currentLabel: string) => {
+    setEditingCatKey(key);
+    setEditingCatValue(currentLabel);
+  }, []);
+
+  const handleFinishRename = useCallback(() => {
+    const key = editingCatKey;
+    const val = editingCatValue.trim();
+    if (key && val) {
+      setCategoryLabels((prev) => ({ ...prev, [key]: val }));
+    }
+    setEditingCatKey(null);
+    setEditingCatValue('');
+  }, [editingCatKey, editingCatValue]);
+
+  const handleAddCategory = useCallback(() => {
+    const name = newCatName.trim().toLowerCase().replace(/\s+/g, '-');
+    if (!name || categoryOrder.includes(name)) return;
+    const label = newCatName.trim();
+    setCategoryOrder((prev) => [...prev, name]);
+    setCategoryLabels((prev) => ({ ...prev, [name]: label }));
+    setNewCatName('');
+    setIsAddingCat(false);
+  }, [newCatName, categoryOrder]);
+
+  const hasAnySkills = editableSkills.length > 0;
 
   return (
     <AnimatePresence mode="wait">
@@ -113,21 +291,149 @@ export default function ResumePortfolio({ lang }: Props) {
                     ? 'Интегрируемые Навыки (Job Skills Matching)'
                     : 'Job Oriented Skillset'}
                 </h3>
-                <CopyButton
-                  text={activeResume.highlightedSkills.join(', ')}
-                  label="Copy"
-                />
+                {hasAnySkills && (
+                  <CopyButton
+                    text={editableSkills.map((s) => s.name).join(', ')}
+                    label="Copy"
+                  />
+                )}
               </div>
-              <div className="skill-filter-container">
-                {activeResume.highlightedSkills.map((s, idx) => (
-                  <span
-                    key={idx}
-                    className="skill-chip"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
+              {hasAnySkills || isAddingCat ? (
+                <div className="space-y-2.5">
+                  {/* Add custom category (at top) */}
+                  <div className="flex items-center gap-2 pb-1">
+                    {isAddingCat ? (
+                      <div className="flex gap-1.5 flex-1">
+                        <input
+                          type="text"
+                          value={newCatName}
+                          onChange={(e) => setNewCatName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleAddCategory();
+                          }}
+                          placeholder={lang === 'ru' ? 'Название категории' : 'Category name'}
+                          className="input-compact text-[11px] flex-1"
+                          autoFocus
+                        />
+                        <button onClick={handleAddCategory} className="btn-add-sm text-[10px] px-2">
+                          OK
+                        </button>
+                        <button
+                          onClick={() => { setIsAddingCat(false); setNewCatName(''); }}
+                          className="text-muted hover:text-body text-[10px]"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setIsAddingCat(true)}
+                        className="btn-add-sm flex items-center gap-1"
+                      >
+                        <Plus size={11} />
+                        {lang === 'ru' ? 'Добавить категорию' : 'Add Category'}
+                      </button>
+                    )}
+                  </div>
+
+                  {allCategories.map((cat) => {
+                    const items = editableSkills.filter((s) => s.category === cat.key);
+                    if (items.length === 0) return null;
+                    return (
+                      <div
+                        key={cat.key}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = 'move';
+                          // Track insertion position for functional drop logic (no visual indicators)
+                          if (e.dataTransfer.types.includes('application/x-cat-key')) {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            const y = e.clientY - rect.top;
+                            setDragInsertPos({ key: cat.key, position: y < rect.height / 2 ? 'before' : 'after' });
+                          } else {
+                            setDragInsertPos(null);
+                          }
+                        }}
+                        onDragLeave={() => { setDragInsertPos(null); }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const pos = dragInsertPos?.key === cat.key ? dragInsertPos.position : 'before';
+                          setDragInsertPos(null);
+                          const skillId = e.dataTransfer.getData('application/x-skill-id');
+                          const catKey = e.dataTransfer.getData('application/x-cat-key');
+                          if (skillId) {
+                            handleMoveSkill(skillId, cat.key);
+                          } else if (catKey) {
+                            handleReorderCategory(catKey, cat.key, pos);
+                          }
+                        }}
+                        className={`rounded-lg p-2 -mx-2 transition-all duration-200 ${
+                          dragInsertPos?.key === cat.key
+                            ? dragInsertPos.position === 'before' ? 'pt-8' : 'pb-8'
+                            : ''
+                        }`}
+                      >
+                        <div
+                          draggable={true}
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData('application/x-cat-key', cat.key);
+                            e.dataTransfer.effectAllowed = 'move';
+                          }}
+                          className="flex items-center gap-2 mb-1 cursor-grab active:cursor-grabbing select-none"
+                        >
+                          <span className="text-muted text-[11px] leading-none" title="Drag to reorder category">
+                            ≡
+                          </span>
+                          {editingCatKey === cat.key ? (
+                            <input
+                              type="text"
+                              value={editingCatValue}
+                              onChange={(e) => setEditingCatValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleFinishRename();
+                                if (e.key === 'Escape') setEditingCatKey(null);
+                              }}
+                              onBlur={handleFinishRename}
+                              className="input-compact text-[10px] font-bold tracking-wider py-0.5 px-1 min-w-0"
+                              autoFocus
+                            />
+                          ) : (
+                            <span
+                              onClick={() => handleStartRename(cat.key, cat.label)}
+                              className="text-[10px] font-bold text-secondary tracking-wider cursor-pointer hover:text-cyan-300 transition-colors"
+                              title="Click to rename"
+                            >
+                              {cat.label}
+                            </span>
+                          )}
+                          <span className="text-[9px] text-muted font-mono">({items.length})</span>
+                        </div>
+                        <div className="skill-filter-container">
+                          {items.map((skill) => (
+                            <span
+                              key={skill.id}
+                              draggable={true}
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData('application/x-skill-id', skill.id);
+                                e.dataTransfer.effectAllowed = 'move';
+                              }}
+                              className="skill-chip group flex items-center gap-1.5 cursor-grab active:cursor-grabbing"
+                            >
+                              <span className="text-[11px]">{skill.name}</span>
+                              <button
+                                onClick={() => handleRemoveSkill(skill.id)}
+                                className="opacity-0 group-hover:opacity-100 text-muted hover:text-red-400 transition-all flex-shrink-0 leading-none"
+                              >
+                                <X size={10} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
 
             {/* 3. Tailored Bullets */}
@@ -258,7 +564,42 @@ export default function ResumePortfolio({ lang }: Props) {
               </div>
             )}
 
-            {/* 5. Cover Letter */}
+            {/* 5. Certificates */}
+            {profile.certificateEntries && profile.certificateEntries.length > 0 && (
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <h3 className="section-title">
+                    <Award size={12} />
+                    {lang === 'ru' ? 'Сертификаты' : 'Certificates'}
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {profile.certificateEntries.map((cert) => (
+                    <div key={cert.id} className="card-surface">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <span className="text-xs font-bold text-body">
+                            {cert.name}
+                          </span>
+                          {cert.issuer && (
+                            <span className="text-xs text-secondary ml-1">
+                              — {cert.issuer}
+                            </span>
+                          )}
+                          {cert.date && (
+                            <span className="text-[10px] text-muted font-mono ml-2">
+                              {cert.date}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 6. Cover Letter */}
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <h3 className="section-title">
