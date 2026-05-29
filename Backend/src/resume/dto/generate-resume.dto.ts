@@ -76,7 +76,7 @@ class CertificateEntryDto {
   url?: string;
 }
 
-export class CandidateProfileDto implements CandidateProfile {
+export class CandidateProfileDto {
   @IsNotEmpty()
   @IsString()
   name!: string;

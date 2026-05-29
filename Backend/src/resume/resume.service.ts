@@ -134,9 +134,9 @@ export class ResumeService {
       }),
       system: [
         {
-          type: 'text',
+          type: 'text' as const,
           text: 'Use the format_tailored_resume tool exactly once with the finished tailored resume. Do not add commentary.',
-          cache_control: { type: 'ephemeral' },
+          cache_control: { type: 'ephemeral' as const },
         },
       ],
       tools: [
@@ -145,7 +145,7 @@ export class ResumeService {
           description:
             'Return the tailored resume content in the exact schema required by the app.',
           input_schema: tailoredResumeSchema,
-          cache_control: { type: 'ephemeral' },
+          cache_control: { type: 'ephemeral' as const },
         },
       ],
       tool_choice: {

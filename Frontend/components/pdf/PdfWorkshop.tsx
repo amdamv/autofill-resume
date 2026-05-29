@@ -168,7 +168,7 @@ export default function ResumePdfWorkshop({
         <div>
           <h2 className="text-lg font-display font-semibold text-cyan-300 flex items-center gap-2">
             <FileCode2 size={18} />
-            LaTeX Workshop
+            Workshop
           </h2>
           <p className="text-xs text-secondary mt-1">{t.pdf.intro}</p>
         </div>

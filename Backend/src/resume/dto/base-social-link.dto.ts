@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional,  IsString } from 'class-validator';
 
 export class BaseSocialLinkDto {
   @IsOptional()
@@ -8,6 +8,10 @@ export class BaseSocialLinkDto {
   @IsOptional()
   @IsString()
   platform?: string;
+
+  @IsOptional()
+  @IsString()
+  label?: string;
 
   @IsOptional()
   @IsString()

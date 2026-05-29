@@ -8,13 +8,8 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { BaseSocialLinkDto } from './base-social-link.dto';
-import type { CandidateProfile } from '../../../../shared/types/profile';
 
-class PdfSocialLinkDto extends BaseSocialLinkDto {
-  @IsOptional()
-  @IsString()
-  label?: string;
-}
+class PdfSocialLinkDto extends BaseSocialLinkDto {}
 
 class PdfExperienceEntryDto {
   @IsOptional()
@@ -68,6 +63,10 @@ class PdfEducationEntryDto {
 class PdfCertificateEntryDto {
   @IsOptional()
   @IsString()
+  id?: string;
+
+  @IsOptional()
+  @IsString()
   name?: string;
 
   @IsOptional()
@@ -79,14 +78,12 @@ class PdfCertificateEntryDto {
   date?: string;
 }
 
-export class PdfCandidateProfileDto implements CandidateProfile {
-  @IsOptional()
+export class PdfCandidateProfileDto {
   @IsString()
-  name?: string;
+  name!: string;
 
-  @IsOptional()
   @IsString()
-  title?: string;
+  title!: string;
 
   @IsOptional()
   @IsString()
