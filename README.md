@@ -6,7 +6,7 @@ AI-powered resume workspace for tailoring CV content to job descriptions, previe
 
 - Claude-powered resume tailoring
 - Editable candidate profile and job description
-- LaTeX Workshop with template/filter selection
+- Workshop with template/filter selection
 - PDF preview and download
 - Browser extension autofill simulator
 - NestJS backend + React/Vite frontend
@@ -52,4 +52,4 @@ npm run lint     # TypeScript check
 
 - Keep API keys only in `.env`.
 - PDF generation requires a local LaTeX installation with `xelatex`.
-- Default PDF template is the FAANG-style ATS-friendly resume in the LaTeX Workshop.
+- Default PDF template is the FAANG-style ATS-friendly resume in the Workshop.

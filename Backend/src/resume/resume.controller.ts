@@ -7,6 +7,7 @@ import {
   Post,
   Res,
   UseGuards,
+    Get
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -28,6 +29,42 @@ export class ResumeController {
   @UseGuards(ThrottlerGuard)
   async generateResume(@Body() dto: GenerateResumeDto) {
     return this.resumeService.generateTailoredResume(dto);
+  }
+
+  @Get('stream')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  async generateResumeStream(
+    @Body() dto: GenerateResumeDto,
+    @Res() response: Response,
+  ) {
+    response.setHeader('Content-Type', 'text/event-stream');
+    response.setHeader('Cache-Control', 'no-cache');
+    response.setHeader('Connection', 'keep-alive');
+    response.setHeader('X-Accel-Buffering', 'no');
+
+    const controller = new AbortController();
+    response.req.on('close', () => controller.abort());
+
+    try {
+      await this.resumeService.generateTailoredResumeStream(
+        dto,
+        (event) => {
+          response.write(
+            `event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`,
+          );
+        },
+        controller.signal,
+      );
+    } catch (err: unknown) {
+      if ((err as Error)?.name === 'AbortError') return;
+      const message =
+        err instanceof Error ? err.message : 'Internal server error';
+      response.write(
+        `event: error\ndata: ${JSON.stringify({ message })}\n\n`,
+      );
+    }
+    response.end();
   }
 
   @Post('render-pdf')

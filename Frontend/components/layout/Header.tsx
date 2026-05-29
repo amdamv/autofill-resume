@@ -22,9 +22,6 @@ export default function Header({ savedResumesCount, lang, onSetLang }: Props) {
           <div>
             <h1 className="text-xl font-bold font-display tracking-tight text-white flex items-center gap-2">
               CVlix
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 font-mono px-2 py-0.5 rounded-full border border-emerald-500/20">
-                NestJS + Zustand
-              </span>
             </h1>
             <p className="text-xs text-secondary">{t.header.subtitle}</p>
           </div>

@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import {
   Download,
   Eye,
@@ -8,7 +11,9 @@ import {
 } from 'lucide-react';
 import { CandidateProfile, TailoredResume } from '../../types/index';
 import type { LanguageCode } from '../../i18n/languages';
+import { cn } from '../../lib/cn';
 import { getTranslations } from '../../i18n/ui';
+import { useResumeStore } from '../../store/index';
 import {
   RESUME_FILTERS,
   RESUME_TEMPLATES,
@@ -22,21 +27,37 @@ type Props = {
   lang: LanguageCode;
 };
 
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
+
 export default function ResumePdfWorkshop({
   profile,
   activeResume,
   lang,
 }: Props) {
   const t = getTranslations(lang);
+  const portfolioCategorizedSkills = useResumeStore((s) => s.portfolioCategorizedSkills);
+  const portfolioCategoryOrder = useResumeStore((s) => s.portfolioCategoryOrder);
   const [templateId, setTemplateId] =
     useState<ResumeTemplateId>('akhmad-classic');
   const [filterId, setFilterId] = useState<ResumeFilterId>('source');
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isRendering, setIsRendering] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [pdfScale, setPdfScale] = useState(0.9);
+  const [renderScale, setRenderScale] = useState(0.9);
+  const zoomTimer = useRef<number | undefined>(undefined);
   const renderRequestId = useRef(0);
   const pdfUrlRef = useRef<string | null>(null);
   const revokeTimeoutRef = useRef<number | null>(null);
+
+  const debounceZoom = useCallback((nextScale: number) => {
+    setPdfScale(nextScale);
+    clearTimeout(zoomTimer.current);
+    zoomTimer.current = window.setTimeout(() => setRenderScale(nextScale), 200);
+  }, []);
 
   // Cleanup blob URL on unmount
   useEffect(() => {
@@ -48,6 +69,8 @@ export default function ResumePdfWorkshop({
       if (pdfUrlRef.current) {
         URL.revokeObjectURL(pdfUrlRef.current);
       }
+
+      clearTimeout(zoomTimer.current);
     };
   }, []);
 
@@ -77,10 +100,12 @@ export default function ResumePdfWorkshop({
             ? profile.experienceEntries
             : activeResume?.experience,
       },
+      portfolioCategorizedSkills,
+      portfolioCategoryOrder,
       templateId,
       filterId,
     }),
-    [profile, activeResume, templateId, filterId],
+    [profile, activeResume, templateId, filterId, portfolioCategorizedSkills, portfolioCategoryOrder],
   );
 
   const renderPdf = useCallback(async () => {
@@ -143,7 +168,7 @@ export default function ResumePdfWorkshop({
         <div>
           <h2 className="text-lg font-display font-semibold text-cyan-300 flex items-center gap-2">
             <FileCode2 size={18} />
-            LaTeX Workshop
+            Workshop
           </h2>
           <p className="text-xs text-secondary mt-1">{t.pdf.intro}</p>
         </div>
@@ -151,9 +176,10 @@ export default function ResumePdfWorkshop({
         <button
           onClick={renderPdf}
           disabled={!activeResume || isRendering}
-          className={`btn-pdf-render ${
-            !activeResume || isRendering ? 'opacity-60 cursor-not-allowed' : ''
-          }`}
+          className={cn(
+            'btn-pdf-render',
+            (!activeResume || isRendering) && 'opacity-60 cursor-not-allowed',
+          )}
         >
           {isRendering ? (
             <Loader2 size={14} className="animate-spin" />
@@ -175,11 +201,12 @@ export default function ResumePdfWorkshop({
               <button
                 key={template.id}
                 onClick={() => setTemplateId(template.id)}
-                className={`btn-template ${
+                className={cn(
+                  'btn-template',
                   templateId === template.id
                     ? 'btn-template--active'
-                    : 'btn-template--inactive'
-                }`}
+                    : 'btn-template--inactive',
+                )}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold">{template.name}</span>
@@ -205,11 +232,12 @@ export default function ResumePdfWorkshop({
               <button
                 key={filter.id}
                 onClick={() => setFilterId(filter.id)}
-                className={`btn-template ${
+                className={cn(
+                  'btn-template',
                   filterId === filter.id
                     ? 'btn-filter--active'
-                    : 'btn-template--inactive'
-                }`}
+                    : 'btn-template--inactive',
+                )}
               >
                 <span className="text-xs font-bold">{filter.name}</span>
                 <p className="text-[10px] leading-relaxed mt-1">
@@ -234,26 +262,66 @@ export default function ResumePdfWorkshop({
               <span className="text-[11px] text-secondary font-mono">
                 akhmad-resume.pdf
               </span>
-              <a
-                href={pdfUrl}
-                download="akhmad-resume.pdf"
-                className="btn-pdf-download"
-              >
-                <Download size={12} />
-                {t.pdf.download}
-              </a>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => debounceZoom(Math.max(0.5, pdfScale - 0.1))}
+                  className="btn-pdf-download px-2"
+                >
+                  −
+                </button>
+
+                <span className="text-[11px] text-cyan-300 font-mono min-w-[42px] text-center">
+                  {Math.round(pdfScale * 100)}%
+                </span>
+
+                <button
+                  onClick={() => debounceZoom(Math.min(2, pdfScale + 0.1))}
+                  className="btn-pdf-download px-2"
+                >
+                  +
+                </button>
+
+                <a
+                  href={pdfUrl}
+                  download="akhmad-resume.pdf"
+                  className="btn-pdf-download"
+                >
+                  <Download size={12} />
+                  {t.pdf.download}
+                </a>
+              </div>
             </div>
-            <iframe
-              key={pdfUrl}
-              title="Resume PDF Preview"
-              src={
-                pdfUrl
-                  ? `${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`
-                  : ''
-              }
-              sandbox="allow-same-origin allow-scripts"
-              className="w-full h-[560px] bg-white rounded-xl border-0"
-            />
+            <div className="w-full h-[560px] overflow-auto bg-[#525659] rounded-xl flex justify-center p-4">
+              <Document
+                file={pdfUrl}
+                loading={
+                  <div className="flex items-center justify-center h-full text-black">
+                    Loading PDF...
+                  </div>
+                }
+                error={
+                  <div className="flex flex-col items-center justify-center h-full text-sm text-slate-700 gap-2">
+                    <span>Failed to load PDF preview.</span>
+                    <a
+                      href={pdfUrl || ''}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-cyan-500 underline"
+                    >
+                      Open PDF
+                    </a>
+                  </div>
+                }
+              >
+                <Page
+                  pageNumber={1}
+                  scale={renderScale}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                />
+              </Document>
+            </div>
           </div>
         ) : (
           <div className="min-h-[360px] flex flex-col items-center justify-center text-center p-8">

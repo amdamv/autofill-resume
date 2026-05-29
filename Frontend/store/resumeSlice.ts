@@ -2,35 +2,10 @@ import type { StateCreator } from 'zustand';
 import type { TailoredResume, ExperienceEntry } from '../types/index';
 import type { StoreState } from './index';
 import { generateResume } from '../services/resume';
-import { MOCK_JOBS } from '../data/mockJobs';
 import {
   getLanguageConfig,
   type LanguageCode,
 } from '../i18n/languages';
-
-const initialDemoResume: TailoredResume = {
-  id: 'demo-res-1',
-  jobTitle: 'Middle Node.js Backend Developer',
-  companyName: 'Default LaTeX Resume',
-  tailoredAt: 'Default template',
-  summary:
-    'Backend Developer with 4+ years of experience building scalable systems using Node.js, NestJS, PostgreSQL and Kafka. Delivered high-load microservices for scalable, business-critical systems including real-time and data-intensive applications. Skilled in system design, caching, authentication, queues, and DevOps. Strong in clean code, team collaboration, and Agile.',
-  highlightedSkills: [
-    'TypeScript', 'JavaScript', 'Node.js', 'NestJS', 'Express',
-    'SQL', 'PostgreSQL', 'MongoDB', 'Redis', 'TypeORM',
-    'Kafka', 'NATS', 'RabbitMQ', 'WebSocket', 'JWT',
-    'Docker', 'Kubernetes', 'CI/CD', 'AWS', 'MinIO',
-    'Git', 'GitHub', 'Jest', 'Swagger', 'Postman', 'Grafana', 'Agile',
-  ],
-  tailoredBullets: [
-    'Implemented batch notification system for tournament winners (up to 50) via Customer.io, resulting in a 25% increase in player retention.',
-    'Implemented UTM tracking during user registration, enabling transparent traffic source analytics and improved marketing campaign optimization.',
-    'Built a Responsible Gaming system with configurable limits and self-exclusion, significantly reducing user complaints.',
-    'Built manual user verification functionality in the admin panel with enhanced filtering and status display, reducing support workload and cutting verification time by 30%.',
-  ],
-  coverLetter:
-    'I am a Middle Node.js Backend Developer with 4+ years of experience building scalable services with Node.js, NestJS, PostgreSQL, Kafka, Redis and Docker. I have delivered high-load production features in gaming and real-time systems, including notifications, tracking, responsible gaming, verification workflows, authentication, caching and SQL optimization.',
-};
 
 export interface ResumeSlice {
   savedResumes: TailoredResume[];
@@ -41,8 +16,17 @@ export interface ResumeSlice {
   isGenerating: boolean;
   generatorError: string | null;
 
+  // Portfolio skill state synced from ResumePortfolio for PDF generation
+  portfolioCategorizedSkills: { category: string; skills: string[] }[];
+  portfolioCategoryOrder: string[];
+
   setActiveResumeId: (id: string | null) => void;
   deleteResume: (id: string) => void;
+
+  syncPortfolioSkills: (
+    skills: { category: string; skills: string[] }[],
+    order: string[],
+  ) => void;
 
   addResumeBullet: (bullet: string) => void;
   removeResumeBullet: (index: number) => void;
@@ -63,13 +47,15 @@ export interface ResumeSlice {
 }
 
 export const createResumeSlice: StateCreator<StoreState, [], [], ResumeSlice> = (set, get) => ({
-  savedResumes: [initialDemoResume],
-  activeResumeId: 'demo-res-1',
-  jobDescription: MOCK_JOBS[0].description,
-  targetCompany: MOCK_JOBS[0].company,
-  targetRole: MOCK_JOBS[0].role,
+  savedResumes: [],
+  activeResumeId: null,
+  jobDescription: '',
+  targetCompany: '',
+  targetRole: '',
   isGenerating: false,
   generatorError: null,
+  portfolioCategorizedSkills: [],
+  portfolioCategoryOrder: [],
 
   setActiveResumeId: (id) => set({ activeResumeId: id }),
 
@@ -82,6 +68,9 @@ export const createResumeSlice: StateCreator<StoreState, [], [], ResumeSlice> = 
           : state.activeResumeId;
       return { savedResumes: filtered, activeResumeId: nextActiveId };
     }),
+
+  syncPortfolioSkills: (skills, order) =>
+    set({ portfolioCategorizedSkills: skills, portfolioCategoryOrder: order }),
 
   addResumeBullet: (bullet) =>
     set((state) => {
@@ -236,6 +225,7 @@ export const createResumeSlice: StateCreator<StoreState, [], [], ResumeSlice> = 
         }),
         summary: parsedData.summary,
         highlightedSkills: parsedData.highlightedSkills,
+        categorizedSkills: parsedData.categorizedSkills,
         tailoredBullets: parsedData.tailoredBullets,
         coverLetter: parsedData.coverLetter,
         experience: parsedData.experienceEntries || [],

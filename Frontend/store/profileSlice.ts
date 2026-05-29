@@ -1,15 +1,32 @@
 import type { StateCreator } from 'zustand';
-import type { CandidateProfile, ExperienceEntry } from '../types/profile';
+import type { CandidateProfile, ExperienceEntry, EducationEntry, SocialLink, CertificateEntry } from '../types/profile';
 import type { StoreState } from './index';
 
-const initialProfile: CandidateProfile = {
-  name: 'Akhmad Akhmedov',
-  title: 'Middle Node.js Backend Developer',
+const emptyProfile: CandidateProfile = {
+  name: '',
+  title: '',
   email: '',
   phone: '',
   linkedin: '',
   github: '',
   location: '',
+  skills: [],
+  experience: '',
+  education: '',
+  experienceEntries: [],
+  educationEntries: [],
+  socialLinks: [],
+  certificateEntries: [],
+};
+
+const demoProfile: CandidateProfile = {
+  name: 'Akhmad Akhmedov',
+  title: 'Middle Node.js Backend Developer',
+  email: 'amdamv@example.com',
+  phone: '+1 (234) 567-89-01',
+  linkedin: 'https://linkedin.com/in/amdamv',
+  github: 'https://github.com/amdamv',
+  location: 'Albania, Durres',
   skills: [
     'TypeScript', 'JavaScript', 'Node.js', 'NestJS', 'Express',
     'SQL', 'PostgreSQL', 'MongoDB', 'Redis', 'TypeORM',
@@ -34,6 +51,18 @@ const initialProfile: CandidateProfile = {
   ],
   education:
     'National University of Radio Electronics, Bachelor of Science in Computer Science, Sep. 2018 - Nov. 2022, Kharkiv, Ukraine',
+  educationEntries: [
+    { id: crypto.randomUUID(), institution: 'National University of Radio Electronics', degree: 'Bachelor of Science', field: 'Computer Science', dates: 'Sep 2018 - Nov 2022', location: 'Kharkiv, Ukraine' },
+  ],
+  socialLinks: [
+    { id: crypto.randomUUID(), platform: 'linkedin', label: 'LinkedIn', url: 'https://linkedin.com/in/amdamv' },
+    { id: crypto.randomUUID(), platform: 'github', label: 'GitHub', url: 'https://github.com/amdamv' },
+    { id: crypto.randomUUID(), platform: 'telegram', label: 'Telegram', url: 'https://t.me/amdamv' },
+  ],
+  certificateEntries: [
+    { id: crypto.randomUUID(), name: 'AWS Certified Solutions Architect', issuer: 'Amazon Web Services', date: '2023' },
+    { id: crypto.randomUUID(), name: 'Google Cloud Professional Engineer', issuer: 'Google Cloud', date: '2024' },
+  ],
 };
 
 export interface ProfileSlice {
@@ -47,37 +76,24 @@ export interface ProfileSlice {
   updateProfileExperience: (index: number, entry: Partial<ExperienceEntry>) => void;
   addProfileExpBullet: (entryIndex: number, bullet: string) => void;
   removeProfileExpBullet: (entryIndex: number, bulletIndex: number) => void;
+  addEducationEntry: (entry: EducationEntry) => void;
+  removeEducationEntry: (index: number) => void;
+  addSocialLink: (link: SocialLink) => void;
+  removeSocialLink: (index: number) => void;
+  addCertificateEntry: (entry: CertificateEntry) => void;
+  removeCertificateEntry: (index: number) => void;
 }
 
 export const createProfileSlice: StateCreator<StoreState, [], [], ProfileSlice> = (set) => ({
-  profile: initialProfile,
+  profile: emptyProfile,
 
   setProfile: (fields) =>
     set((state) => ({ profile: { ...state.profile, ...fields } })),
 
   loadDemoProfile: () =>
-    set((state) => ({
-      profile: {
-        ...initialProfile,
-        name: state.profile.name || initialProfile.name,
-        title: state.profile.title || initialProfile.title,
-        email: state.profile.email || initialProfile.email,
-        phone: state.profile.phone || initialProfile.phone,
-        linkedin: state.profile.linkedin || initialProfile.linkedin,
-        github: state.profile.github || initialProfile.github,
-        location: state.profile.location || initialProfile.location,
-        skills:
-          state.profile.skills.length > 0
-            ? state.profile.skills
-            : initialProfile.skills,
-        experience: state.profile.experience || initialProfile.experience,
-        education: state.profile.education || initialProfile.education,
-        experienceEntries:
-          state.profile.experienceEntries && state.profile.experienceEntries.length > 0
-            ? state.profile.experienceEntries
-            : initialProfile.experienceEntries,
-      },
-    })),
+    set({
+      profile: { ...demoProfile },
+    }),
 
   addSkill: (skill) => {
     const trimmed = skill.trim();
@@ -154,6 +170,74 @@ export const createProfileSlice: StateCreator<StoreState, [], [], ProfileSlice> 
             i === entryIndex
               ? { ...e, bullets: e.bullets.filter((_, bi) => bi !== bulletIndex) }
               : e,
+        ),
+      },
+    })),
+
+  addEducationEntry: (entry) =>
+    set((state) => {
+      const entries = [...(state.profile.educationEntries || []), entry];
+      return {
+        profile: {
+          ...state.profile,
+          educationEntries: entries,
+          education: entries.map(
+            e => [e.institution, e.degree, e.field, e.dates, e.location].filter(Boolean).join(', ')
+          ).join('; '),
+        },
+      };
+    }),
+
+  removeEducationEntry: (index) =>
+    set((state) => {
+      const entries = (state.profile.educationEntries || []).filter(
+        (_, i) => i !== index,
+      );
+      return {
+        profile: {
+          ...state.profile,
+          educationEntries: entries,
+          education: entries.length
+            ? entries.map(
+                e => [e.institution, e.degree, e.field, e.dates, e.location].filter(Boolean).join(', ')
+              ).join('; ')
+            : '',
+        },
+      };
+    }),
+
+  addSocialLink: (link) =>
+    set((state) => ({
+      profile: {
+        ...state.profile,
+        socialLinks: [...(state.profile.socialLinks || []), link],
+      },
+    })),
+
+  removeSocialLink: (index) =>
+    set((state) => ({
+      profile: {
+        ...state.profile,
+        socialLinks: (state.profile.socialLinks || []).filter(
+          (_, i) => i !== index,
+        ),
+      },
+    })),
+
+  addCertificateEntry: (entry) =>
+    set((state) => ({
+      profile: {
+        ...state.profile,
+        certificateEntries: [...(state.profile.certificateEntries || []), entry],
+      },
+    })),
+
+  removeCertificateEntry: (index) =>
+    set((state) => ({
+      profile: {
+        ...state.profile,
+        certificateEntries: (state.profile.certificateEntries || []).filter(
+          (_, i) => i !== index,
         ),
       },
     })),

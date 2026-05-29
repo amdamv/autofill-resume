@@ -9,6 +9,7 @@ export type ExperienceEntry = {
 export type TailoredResume = {
   summary: string;
   highlightedSkills: string[];
+  categorizedSkills?: { category: string; skills: string[] }[];
   tailoredBullets: string[];
   coverLetter: string;
   experienceEntries?: ExperienceEntry[];

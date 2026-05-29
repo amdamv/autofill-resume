@@ -4,6 +4,9 @@ import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
 import { promisify } from 'util';
+import { normalizeUrl } from '../../../../shared/utils/url';
+import { socialIcon } from '../../../../shared/constants/social-platforms';
+import { SKILL_CATEGORIES, SkillCategory } from '../../../../shared/config/skill-categories';
 import { RenderResumeDto } from '../dto/render-resume.dto';
 
 const execFileAsync = promisify(execFile);
@@ -80,6 +83,12 @@ const filterSkillPriority = {
   ],
 } as const;
 
+const KEYWORD_CATEGORIES = SKILL_CATEGORIES.flatMap((cat) =>
+  cat.keywords.map((kw) => ({ kw: kw.toLowerCase(), catKey: cat.key })),
+);
+
+const CATEGORY_MAX = new Map(SKILL_CATEGORIES.map((c) => [c.key, c.max]));
+
 @Injectable()
 export class LatexRendererService {
   async renderPdf(dto: RenderResumeDto): Promise<Buffer> {
@@ -154,10 +163,17 @@ export class LatexRendererService {
     );
     const skillGroups = this.groupSkills(skills);
     const projects = this.buildProjects(dto, skills);
-    const certificates = this.buildCertificates(dto);
+    const certificates = this.buildCertificates(dto, profile);
     const header = this.renderHeader(profile, title);
     const aboutSection = this.renderAboutSection(resume.summary);
-    const skillsSection = this.renderSkillsSection(skillGroups);
+    const portfolioCats = dto.portfolioCategorizedSkills?.length
+      ? dto.portfolioCategorizedSkills
+      : resume.categorizedSkills?.length
+        ? resume.categorizedSkills
+        : null;
+    const skillsSection = portfolioCats
+      ? this.renderCategorizedSkillsSection(portfolioCats)
+      : this.renderSkillsSection(skillGroups);
     const experienceSection = experienceSections.length
       ? String.raw`\section{Experience}
   \resumeSubHeadingListStart
@@ -190,7 +206,9 @@ ${certificates.map((certificate) => `    \\item{\\textbf{${this.escape(certifica
 \setmainlanguage{english}
 \setotherlanguage{russian}
 
-\setmainfont{Arial}
+\IfFontExistsTF{Arial}
+  {\setmainfont{Arial}}
+  {\setmainfont{DejaVu Sans}}
 \defaultfontfeatures{Ligatures=TeX}
 \usepackage[letterpaper,margin=0.55in]{geometry}
 \usepackage{latexsym}
@@ -274,6 +292,19 @@ ${certificatesSection}
   ): string {
     const name = this.clean(profile.name);
     const jobTitle = this.clean(title);
+
+    const socialLinkEntries = (profile.socialLinks ?? [])
+      .map((link) => ({
+        icon: this.socialIcon(link.platform),
+        url: this.normalizeUrl(link.url),
+        label: this.clean(link.label) || this.stripProtocol(this.clean(link.url)),
+      }))
+      .filter((link) => link.url && link.label)
+      .map(
+        (link) =>
+          String.raw`\href{${this.safeUrl(link.url)}}{\raisebox{-0.2\height}${link.icon}\ \underline{${this.escape(link.label)}}}`,
+      );
+
     const contacts = [
       profile.phone
         ? String.raw`\raisebox{-0.2\height}\faPhone\ ${this.escape(profile.phone)}`
@@ -287,6 +318,7 @@ ${certificatesSection}
       profile.github
         ? String.raw`\href{${this.safeUrl(profile.github)}}{\raisebox{-0.2\height}\faGithub\ \underline{${this.escape(this.stripProtocol(profile.github))}}}`
         : '',
+      ...socialLinkEntries,
       profile.location
         ? String.raw`\raisebox{-0.2\height}\faMapMarker* \ ${this.escape(profile.location)}`
         : '',
@@ -303,18 +335,13 @@ ${certificatesSection}
     return String.raw`\begin{center}
 ${name ? `    {\\Huge \\scshape ${this.escape(name)}} \\\\ \\vspace{2pt}` : ''}
 ${jobTitle ? `    \\textbf{${this.escape(jobTitle)}} \\\\ \\vspace{3pt}` : ''}
-${contacts.length ? `    \\small\n${contactLines}` : ''}
+${contacts.length ? `    \\footnotesize\n${contactLines}` : ''}
     \vspace{-8pt}
 \end{center}`;
   }
 
   private contactLines(contacts: string[]): string[][] {
-    if (contacts.length <= 3) {
-      return [contacts];
-    }
-
-    const splitAt = Math.ceil(contacts.length / 2);
-    return [contacts.slice(0, splitAt), contacts.slice(splitAt)];
+    return [contacts];
   }
 
   private renderAboutSection(summary?: string): string {
@@ -330,17 +357,39 @@ ${contacts.length ? `    \\small\n${contactLines}` : ''}
     skillGroups: ReturnType<LatexRendererService['groupSkills']>,
   ): string {
     const rows = [
-      { label: 'Backend', values: skillGroups.backend },
-      { label: 'Frontend', values: skillGroups.frontend },
-      { label: 'Databases', values: skillGroups.databases },
-      { label: 'DevOps', values: skillGroups.devops },
-      { label: 'Cloud', values: skillGroups.cloud },
-      { label: 'AI/LLM Tools', values: skillGroups.ai },
+      { label: 'Backend', values: skillGroups[SkillCategory.Backend] },
+      { label: 'Frontend', values: skillGroups[SkillCategory.Frontend] },
+      { label: 'Databases', values: skillGroups[SkillCategory.Databases] },
+      { label: 'DevOps', values: skillGroups[SkillCategory.DevOps] },
+      { label: 'Cloud', values: skillGroups[SkillCategory.Cloud] },
+      { label: 'AI/LLM Tools', values: skillGroups[SkillCategory.AI] },
     ]
       .filter((row) => row.values.length)
       .map(
         (row) =>
           `    \\textbf{${row.label}:} ${this.escape(row.values.join(', '))}`,
+      )
+      .join(' \\\\\n');
+
+    if (!rows) return '';
+
+    return String.raw`\section{Skills}
+\begin{itemize}[leftmargin=0.15in, label={}, itemsep=1pt, topsep=1pt]
+  \small{\item{
+${rows}
+  }}
+\end{itemize}
+\vspace{-12pt}`;
+  }
+
+  private renderCategorizedSkillsSection(
+    categories: { category: string; skills: string[] }[],
+  ): string {
+    const rows = categories
+      .filter((cat) => cat.skills.length > 0)
+      .map(
+        (cat) =>
+          `    \\textbf{${this.escape(cat.category)}:} ${this.escape(cat.skills.join(', '))}`,
       )
       .join(' \\\\\n');
 
@@ -476,7 +525,17 @@ ${bullets.map((bullet) => `        \\resumeItem{${this.escape(bullet)}}`).join('
 ${bulletList}`;
   }
 
-  private buildCertificates(dto: RenderResumeDto): string[] {
+  private buildCertificates(dto: RenderResumeDto, profile?: RenderResumeDto['profile']): string[] {
+    const certificateEntries = profile?.certificateEntries;
+    if (certificateEntries?.length) {
+      return certificateEntries
+        .filter((c) => this.clean(c.name))
+        .map((c) => {
+          const parts = [this.clean(c.name), this.clean(c.issuer), this.clean(c.date)].filter(Boolean);
+          return parts.join(', ');
+        });
+    }
+
     const explicitCertificates = this.cleanArray(
       (dto.resume || {}).certificates,
     );
@@ -555,83 +614,34 @@ ${bulletList}`;
   }
 
   private groupSkills(skills: string[]) {
-    const has = (keywords: string[]) =>
-      skills.filter((skill) =>
-        keywords.some((keyword) =>
-          skill.toLowerCase().includes(keyword.toLowerCase()),
-        ),
-      );
-
-    const backend = has([
-      'Node',
-      'TypeScript',
-      'Java',
-      'Python',
-      'Nest',
-      'Express',
-      'GraphQL',
-      'REST',
-      'Microservices',
-      'Kafka',
-      'Rabbit',
-      'NATS',
-    ]).slice(0, 9);
-    const frontend = has([
-      'React',
-      'Next',
-      'JavaScript',
-      'HTML',
-      'CSS',
-      'Tailwind',
-      'State',
-    ]).slice(0, 7);
-    const databases = has([
-      'PostgreSQL',
-      'MySQL',
-      'MongoDB',
-      'Redis',
-      'Elasticsearch',
-      'SQL',
-    ]).slice(0, 7);
-    const devops = has([
-      'Docker',
-      'Kubernetes',
-      'CI/CD',
-      'GitHub Actions',
-      'GitLab',
-      'Linux',
-      'Observability',
-      'Grafana',
-    ]).slice(0, 8);
-    const cloud = has([
-      'AWS',
-      'GCP',
-      'Azure',
-      'S3',
-      'Lambda',
-      'SQS',
-      'SNS',
-      'Cloud Run',
-      'Oracle Cloud',
-    ]).slice(0, 8);
-    const ai = has([
-      'OpenAI',
-      'LangChain',
-      'LLM',
-      'AI',
-      'Vector',
-      'RAG',
-      'Prompt',
-    ]).slice(0, 7);
-
-    return {
-      backend,
-      frontend,
-      databases,
-      devops,
-      cloud,
-      ai,
+    const result: Record<SkillCategory, string[]> & { other: string[] } = {
+      [SkillCategory.Backend]: [],
+      [SkillCategory.Frontend]: [],
+      [SkillCategory.Databases]: [],
+      [SkillCategory.DevOps]: [],
+      [SkillCategory.Cloud]: [],
+      [SkillCategory.AI]: [],
+      other: [],
     };
+
+    const counts = new Map<SkillCategory, number>();
+
+    for (const skill of skills) {
+      const lower = skill.toLowerCase();
+      const match = KEYWORD_CATEGORIES.find((entry) => lower.includes(entry.kw));
+      if (match) {
+        const count = counts.get(match.catKey) ?? 0;
+        const limit = CATEGORY_MAX.get(match.catKey) ?? Infinity;
+        if (count < limit) {
+          result[match.catKey].push(skill);
+          counts.set(match.catKey, count + 1);
+          continue;
+        }
+      }
+      result.other.push(skill);
+    }
+
+    return result;
   }
 
   private clean(value?: string | null): string {
@@ -662,5 +672,21 @@ ${bulletList}`;
 
   private safeUrl(value?: string): string {
     return (value || '').replace(/[{}\s]/g, '');
+  }
+
+  private normalizeUrl(value?: string): string {
+    return normalizeUrl(value);
+  }
+
+  private socialIcon(platform?: string): string {
+    const latexIcons: Record<string, string> = {
+      linkedin: '\\faLinkedin',
+      github: '\\faGithub',
+      twitter: '\\faTwitter',
+      youtube: '\\faYoutube',
+      telegram: '\\faTelegram',
+      globe: '\\faGlobe',
+    };
+    return latexIcons[socialIcon(platform)] || '\\faGlobe';
   }
 }

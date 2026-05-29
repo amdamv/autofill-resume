@@ -1,3 +1,11 @@
+/* === Global reset === */
+html, body {
+  overflow-x: hidden;
+  background-color: #25213b;
+  margin: 0;
+  padding: 0;
+}
+
 /* === Scrollbar === */
 ::-webkit-scrollbar {
   width: 6px;

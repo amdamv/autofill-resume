@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import express from 'express';
 import path from 'path';
@@ -36,7 +36,8 @@ async function bootstrap() {
   }
 
   await app.listen(PORT, '0.0.0.0');
-  console.log(`NestJS server running on http://localhost:${PORT}`);
+  const logger = new Logger('Bootstrap');
+  logger.log(`Server running on http://localhost:${PORT}`);
 }
 
 bootstrap();

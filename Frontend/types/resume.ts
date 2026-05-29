@@ -7,6 +7,7 @@ export interface TailoredResume {
   tailoredAt: string;
   summary: string;
   highlightedSkills: string[];
+  categorizedSkills?: { category: string; skills: string[] }[];
   tailoredBullets: string[];
   coverLetter: string;
   experience?: ExperienceEntry[];
