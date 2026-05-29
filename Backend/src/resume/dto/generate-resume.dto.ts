@@ -1,5 +1,7 @@
-import { IsNotEmpty, IsString, IsOptional, IsObject, ValidateNested, IsArray, IsDefined, ValidateIf, IsEmail, IsNumber, IsPhoneNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsObject, ValidateNested, IsArray, IsEmail, IsPhoneNumber } from 'class-validator';
 import { Type } from 'class-transformer';
+import { BaseSocialLinkDto } from './base-social-link.dto';
+import type { CandidateProfile } from '../../../../shared/types/profile';
 
 class ExperienceEntryDto {
   @IsOptional()
@@ -24,21 +26,57 @@ class ExperienceEntryDto {
   bullets?: string[];
 }
 
-class SocialLinkDto {
+class SocialLinkDto extends BaseSocialLinkDto {}
+
+class EducationEntryDto {
   @IsOptional()
   @IsString()
   id?: string;
 
   @IsOptional()
   @IsString()
-  platform?: string;
+  institution?: string;
+
+  @IsOptional()
+  @IsString()
+  degree?: string;
+
+  @IsOptional()
+  @IsString()
+  field?: string;
+
+  @IsOptional()
+  @IsString()
+  dates?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+}
+
+class CertificateEntryDto {
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  issuer?: string;
+
+  @IsOptional()
+  @IsString()
+  date?: string;
 
   @IsOptional()
   @IsString()
   url?: string;
 }
 
-export class CandidateProfileDto {
+export class CandidateProfileDto implements CandidateProfile {
   @IsNotEmpty()
   @IsString()
   name!: string;
@@ -52,9 +90,21 @@ export class CandidateProfileDto {
   email?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsString()
   @IsPhoneNumber()
   phone?: string;
+
+  @IsOptional()
+  @IsString()
+  linkedin?: string;
+
+  @IsOptional()
+  @IsString()
+  github?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
 
   @IsOptional()
   @IsArray()
@@ -78,8 +128,20 @@ export class CandidateProfileDto {
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
+  @Type(() => EducationEntryDto)
+  educationEntries?: EducationEntryDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => SocialLinkDto)
   socialLinks?: SocialLinkDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CertificateEntryDto)
+  certificateEntries?: CertificateEntryDto[];
 }
 
 export class GenerateResumeDto {

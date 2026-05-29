@@ -4,7 +4,8 @@ import type { StoreState } from './index';
 import type { LanguageCode } from '../i18n/languages';
 import { DEFAULT_LANGUAGE } from '../i18n/languages';
 import { MOCK_JOBS } from '../data/mockJobs';
-import { generateResumeStream } from '../services/resume';
+import { scanVacancyAndGenerate } from '../services/jobfill.service';
+import { autofillWebForm } from '../services/autofill.service';
 
 interface CustomField {
   id: string;
@@ -68,7 +69,6 @@ export const createExtensionSlice: StateCreator<
   [],
   ExtensionSlice
 > = (set, get) => {
-  // Persistent timeout IDs for cleanup across calls
   let injectTimeoutId: ReturnType<typeof setTimeout> | null = null;
   let highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -119,33 +119,13 @@ export const createExtensionSlice: StateCreator<
       MOCK_JOBS.find((j) => j.id === get().selectedJobId) || MOCK_JOBS[0];
 
     try {
-      const rawResult = await generateResumeStream(
-        {
-          profile: get().profile,
-          jobDescription: activeJob.description,
-          targetLanguage: lang,
-        },
-        (event) => {
-          if (event.type === 'progress' && event.data.message) {
-            set({ scanStatusStep: event.data.message });
-          }
-        },
+      const newResume = await scanVacancyAndGenerate(
+        get().profile,
+        activeJob.description,
+        lang,
+        { role: activeJob.role, company: activeJob.company },
+        (message) => set({ scanStatusStep: message }),
       );
-
-      const newResume: TailoredResume = {
-        id: 'jobfill-res-' + Date.now(),
-        jobTitle: activeJob.role,
-        companyName: activeJob.company,
-        tailoredAt: new Date().toLocaleTimeString('ru-RU', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        summary: rawResult.summary,
-        highlightedSkills: rawResult.highlightedSkills,
-        categorizedSkills: rawResult.categorizedSkills,
-        tailoredBullets: rawResult.tailoredBullets,
-        coverLetter: rawResult.coverLetter,
-      };
 
       set({
         scannedResume: newResume,
@@ -166,85 +146,35 @@ export const createExtensionSlice: StateCreator<
 
     const { profile, scannedResume, customFields } = get();
 
-    const inputsToFill = [
-      { key: 'fullName', label: 'ФИО', value: profile.name },
-      { key: 'email', label: 'Email адрес', value: profile.email || '' },
-      { key: 'phone', label: 'Номер телефона', value: profile.phone || '' },
-      {
-        key: 'skills',
-        label: 'Навыки',
-        value: scannedResume
-          ? scannedResume.highlightedSkills.join(', ')
-          : profile.skills.join(', '),
-      },
-      {
-        key: 'summary',
-        label: 'О себе',
-        value: scannedResume
-          ? scannedResume.summary
-          : 'Инженер-разработчик готовый решать бизнес задачи.',
-      },
-      {
-        key: 'achievements',
-        label: 'Опыт работы',
-        value: scannedResume
-          ? scannedResume.tailoredBullets.join('\n')
-          : profile.experience,
-      },
-      {
-        key: 'expectedSalary',
-        label: 'ЗП',
-        value: customFields.find((f) => f.key === 'salary')?.value || '',
-      },
-      {
-        key: 'githubUrl',
-        label: 'GitHub',
-        value: customFields.find((f) => f.key === 'github')?.value || '',
-      },
-      {
-        key: 'portfolioUrl',
-        label: 'Портфолио',
-        value: customFields.find((f) => f.key === 'portfolio')?.value || '',
-      },
-      {
-        key: 'coverLetter',
-        label: 'Письмо',
-        value: scannedResume
-          ? scannedResume.coverLetter
-          : 'Здравствуйте! Очень заинтересовала вакансия.',
-      },
-      {
-        key: 'customNotice',
-        label: 'Выход на связь / Срок',
-        value: customFields.find((f) => f.key === 'noticePeriod')?.value || '',
-      },
-    ] as const;
+    await autofillWebForm({
+      profile,
+      scannedResume,
+      customFields,
+      onSetField: (key, value) =>
+        set((s) => ({
+          webFormFields: { ...s.webFormFields, [key]: value },
+        })),
+      onProgress: (step) => set({ injectStep: step }),
+      onDone: () => {
+        set({
+          injectStep: 'Поля успешно заполнены JobFill! ✨',
+          showFormHighlight: true,
+        });
 
-    for (const item of inputsToFill) {
-      set({ injectStep: `Заполнение: ${item.label}...` });
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      set((s) => ({
-        webFormFields: { ...s.webFormFields, [item.key]: item.value },
-      }));
-    }
+        if (injectTimeoutId) clearTimeout(injectTimeoutId);
+        if (highlightTimeoutId) clearTimeout(highlightTimeoutId);
 
-    set({
-      injectStep: 'Поля успешно заполнены JobFill! ✨',
-      showFormHighlight: true,
+        injectTimeoutId = setTimeout(() => {
+          set({ isInjecting: false, injectStep: null });
+          injectTimeoutId = null;
+        }, 1500);
+
+        highlightTimeoutId = setTimeout(() => {
+          set({ showFormHighlight: false });
+          highlightTimeoutId = null;
+        }, 3500);
+      },
     });
-
-    if (injectTimeoutId) clearTimeout(injectTimeoutId);
-    if (highlightTimeoutId) clearTimeout(highlightTimeoutId);
-
-    injectTimeoutId = setTimeout(() => {
-      set({ isInjecting: false, injectStep: null });
-      injectTimeoutId = null;
-    }, 1500);
-
-    highlightTimeoutId = setTimeout(() => {
-      set({ showFormHighlight: false });
-      highlightTimeoutId = null;
-    }, 3500);
   },
   };
 };

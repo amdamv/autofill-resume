@@ -46,7 +46,10 @@ export function generateResumeStream(
       throw new Error(`Stream request failed: ${response.status}`);
     }
 
-    const reader = response.body!.getReader();
+    if (!response.body) {
+      throw new Error('ReadableStream is not available');
+    }
+    const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
     let currentEvent = '';

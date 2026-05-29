@@ -7,6 +7,7 @@ import {
   Post,
   Res,
   UseGuards,
+    Get
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -30,7 +31,7 @@ export class ResumeController {
     return this.resumeService.generateTailoredResume(dto);
   }
 
-  @Post('stream')
+  @Get('stream')
   @HttpCode(HttpStatus.OK)
   @UseGuards(ThrottlerGuard)
   async generateResumeStream(
@@ -42,13 +43,21 @@ export class ResumeController {
     response.setHeader('Connection', 'keep-alive');
     response.setHeader('X-Accel-Buffering', 'no');
 
+    const controller = new AbortController();
+    response.req.on('close', () => controller.abort());
+
     try {
-      await this.resumeService.generateTailoredResumeStream(dto, (event) => {
-        response.write(
-          `event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`,
-        );
-      });
+      await this.resumeService.generateTailoredResumeStream(
+        dto,
+        (event) => {
+          response.write(
+            `event: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`,
+          );
+        },
+        controller.signal,
+      );
     } catch (err: unknown) {
+      if ((err as Error)?.name === 'AbortError') return;
       const message =
         err instanceof Error ? err.message : 'Internal server error';
       response.write(

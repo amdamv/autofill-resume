@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { CandidateProfile, TailoredResume } from '../../types/index';
 import type { LanguageCode } from '../../i18n/languages';
+import { cn } from '../../lib/cn';
 import { getTranslations } from '../../i18n/ui';
 import { useResumeStore } from '../../store/index';
 import {
@@ -46,9 +47,17 @@ export default function ResumePdfWorkshop({
   const [isRendering, setIsRendering] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [pdfScale, setPdfScale] = useState(0.9);
+  const [renderScale, setRenderScale] = useState(0.9);
+  const zoomTimer = useRef<number | undefined>(undefined);
   const renderRequestId = useRef(0);
   const pdfUrlRef = useRef<string | null>(null);
   const revokeTimeoutRef = useRef<number | null>(null);
+
+  const debounceZoom = useCallback((nextScale: number) => {
+    setPdfScale(nextScale);
+    clearTimeout(zoomTimer.current);
+    zoomTimer.current = window.setTimeout(() => setRenderScale(nextScale), 200);
+  }, []);
 
   // Cleanup blob URL on unmount
   useEffect(() => {
@@ -60,6 +69,8 @@ export default function ResumePdfWorkshop({
       if (pdfUrlRef.current) {
         URL.revokeObjectURL(pdfUrlRef.current);
       }
+
+      clearTimeout(zoomTimer.current);
     };
   }, []);
 
@@ -165,9 +176,10 @@ export default function ResumePdfWorkshop({
         <button
           onClick={renderPdf}
           disabled={!activeResume || isRendering}
-          className={`btn-pdf-render ${
-            !activeResume || isRendering ? 'opacity-60 cursor-not-allowed' : ''
-          }`}
+          className={cn(
+            'btn-pdf-render',
+            (!activeResume || isRendering) && 'opacity-60 cursor-not-allowed',
+          )}
         >
           {isRendering ? (
             <Loader2 size={14} className="animate-spin" />
@@ -189,11 +201,12 @@ export default function ResumePdfWorkshop({
               <button
                 key={template.id}
                 onClick={() => setTemplateId(template.id)}
-                className={`btn-template ${
+                className={cn(
+                  'btn-template',
                   templateId === template.id
                     ? 'btn-template--active'
-                    : 'btn-template--inactive'
-                }`}
+                    : 'btn-template--inactive',
+                )}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold">{template.name}</span>
@@ -219,11 +232,12 @@ export default function ResumePdfWorkshop({
               <button
                 key={filter.id}
                 onClick={() => setFilterId(filter.id)}
-                className={`btn-template ${
+                className={cn(
+                  'btn-template',
                   filterId === filter.id
                     ? 'btn-filter--active'
-                    : 'btn-template--inactive'
-                }`}
+                    : 'btn-template--inactive',
+                )}
               >
                 <span className="text-xs font-bold">{filter.name}</span>
                 <p className="text-[10px] leading-relaxed mt-1">
@@ -251,9 +265,7 @@ export default function ResumePdfWorkshop({
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() =>
-                    setPdfScale((prev) => Math.max(0.5, prev - 0.1))
-                  }
+                  onClick={() => debounceZoom(Math.max(0.5, pdfScale - 0.1))}
                   className="btn-pdf-download px-2"
                 >
                   −
@@ -264,9 +276,7 @@ export default function ResumePdfWorkshop({
                 </span>
 
                 <button
-                  onClick={() =>
-                    setPdfScale((prev) => Math.min(2, prev + 0.1))
-                  }
+                  onClick={() => debounceZoom(Math.min(2, pdfScale + 0.1))}
                   className="btn-pdf-download px-2"
                 >
                   +
@@ -306,7 +316,7 @@ export default function ResumePdfWorkshop({
               >
                 <Page
                   pageNumber={1}
-                  scale={pdfScale}
+                  scale={renderScale}
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
                 />

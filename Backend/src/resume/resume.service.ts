@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   BadRequestException,
   Inject,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Anthropic from '@anthropic-ai/sdk';
@@ -20,6 +21,7 @@ import {
 
 @Injectable()
 export class ResumeService {
+  private readonly logger = new Logger(ResumeService.name);
   private aiClient: Anthropic | null = null;
 
   constructor(@Inject(ConfigService) private configService: ConfigService) {}
@@ -89,14 +91,8 @@ export class ResumeService {
     return result;
   }
 
-  async generateTailoredResume(
-    dto: GenerateResumeDto,
-  ): Promise<TailoredResume> {
+  private prepareRequestConfig(dto: GenerateResumeDto) {
     const { profile, jobDescription, targetLanguage = 'ru' } = dto;
-    const ai = this.getAiClient();
-    const model =
-      this.configService.get<string>('anthropicModel') ||
-      DEFAULT_ANTHROPIC_MODEL;
 
     const skillsStr = Array.isArray(profile.skills)
       ? profile.skills.map((skill) => sanitizeInput(skill, 100)).join(', ')
@@ -123,47 +119,59 @@ export class ResumeService {
       education: sanitizeInput(profile.education, 1500),
     };
 
-    const sanitizedJobDescription = sanitizeInput(jobDescription, 8000);
-    const targetLanguageName = getResumeTargetLanguageName(targetLanguage);
+    return {
+      model:
+        this.configService.get<string>('anthropicModel') || DEFAULT_ANTHROPIC_MODEL,
+      prompt: buildTailoredResumePrompt({
+        name: sanitizedProfile.name,
+        title: sanitizedProfile.title,
+        skills: skillsStr,
+        experience: sanitizedProfile.experience,
+        experienceEntries: experienceEntriesStr,
+        education: sanitizedProfile.education,
+        jobDescription: sanitizeInput(jobDescription, 8000),
+        targetLanguage: getResumeTargetLanguageName(targetLanguage),
+      }),
+      system: [
+        {
+          type: 'text',
+          text: 'Use the format_tailored_resume tool exactly once with the finished tailored resume. Do not add commentary.',
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      tools: [
+        {
+          name: 'format_tailored_resume',
+          description:
+            'Return the tailored resume content in the exact schema required by the app.',
+          input_schema: tailoredResumeSchema,
+          cache_control: { type: 'ephemeral' },
+        },
+      ],
+      tool_choice: {
+        type: 'tool',
+        name: 'format_tailored_resume',
+        disable_parallel_tool_use: true,
+      } as const,
+    };
+  }
 
-    const prompt = buildTailoredResumePrompt({
-      name: sanitizedProfile.name,
-      title: sanitizedProfile.title,
-      skills: skillsStr,
-      experience: sanitizedProfile.experience,
-      experienceEntries: experienceEntriesStr,
-      education: sanitizedProfile.education,
-      jobDescription: sanitizedJobDescription,
-      targetLanguage: targetLanguageName,
-    });
+  async generateTailoredResume(
+    dto: GenerateResumeDto,
+  ): Promise<TailoredResume> {
+    const ai = this.getAiClient();
+    const { model, prompt, system, tools, tool_choice } =
+      this.prepareRequestConfig(dto);
 
     try {
       const response = await ai.messages.create({
         model,
         max_tokens: MAX_PROMPT_TOKENS,
         thinking: { type: 'disabled' },
-        system: [
-          {
-            type: 'text',
-            text: 'Use the format_tailored_resume tool exactly once with the finished tailored resume. Do not add commentary.',
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
+        system,
         messages: [{ role: 'user', content: prompt }],
-        tools: [
-          {
-            name: 'format_tailored_resume',
-            description:
-              'Return the tailored resume content in the exact schema required by the app.',
-            input_schema: tailoredResumeSchema,
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
-        tool_choice: {
-          type: 'tool',
-          name: 'format_tailored_resume',
-          disable_parallel_tool_use: true,
-        },
+        tools,
+        tool_choice,
       });
 
       const toolUse = response.content.find(
@@ -189,7 +197,7 @@ export class ResumeService {
 
       return this.toTailoredResume(text);
     } catch (error: unknown) {
-      console.error('Error generating tailored resume:', error);
+      this.logger.error('Error generating tailored resume:', error instanceof Error ? error.stack : String(error));
 
       throw new InternalServerErrorException(
         'Internal server error during resume tailoring',
@@ -200,51 +208,11 @@ export class ResumeService {
   async generateTailoredResumeStream(
     dto: GenerateResumeDto,
     onEvent: (event: { type: string; data: any }) => void,
+    signal?: AbortSignal,
   ): Promise<TailoredResume> {
-    const { profile, jobDescription, targetLanguage = 'ru' } = dto;
     const ai = this.getAiClient();
-    const model =
-      this.configService.get<string>('anthropicModel') ||
-      DEFAULT_ANTHROPIC_MODEL;
-
-    const skillsStr = Array.isArray(profile.skills)
-      ? profile.skills.map((skill) => sanitizeInput(skill, 100)).join(', ')
-      : 'N/A';
-
-    const experienceEntriesStr =
-      Array.isArray(profile.experienceEntries) &&
-      profile.experienceEntries.length > 0
-        ? profile.experienceEntries
-            .map(
-              (e) =>
-                `- ${sanitizeInput(e.position, 120)} at ${sanitizeInput(e.company, 120)} (${sanitizeInput(e.dates, 80)}, ${sanitizeInput(e.location, 120)})\n  Achievements:\n    ${(e.bullets || [])
-                  .slice(0, 4)
-                  .map((b) => `• ${sanitizeInput(b, 150)}`)
-                  .join('\n    ')}`,
-            )
-            .join('\n')
-        : 'N/A';
-
-    const sanitizedProfile = {
-      name: sanitizeInput(profile.name, 120),
-      title: sanitizeInput(profile.title, 120),
-      experience: sanitizeInput(profile.experience, 3000),
-      education: sanitizeInput(profile.education, 1500),
-    };
-
-    const sanitizedJobDescription = sanitizeInput(jobDescription, 8000);
-    const targetLanguageName = getResumeTargetLanguageName(targetLanguage);
-
-    const prompt = buildTailoredResumePrompt({
-      name: sanitizedProfile.name,
-      title: sanitizedProfile.title,
-      skills: skillsStr,
-      experience: sanitizedProfile.experience,
-      experienceEntries: experienceEntriesStr,
-      education: sanitizedProfile.education,
-      jobDescription: sanitizedJobDescription,
-      targetLanguage: targetLanguageName,
-    });
+    const { model, prompt, system, tools, tool_choice } =
+      this.prepareRequestConfig(dto);
 
     onEvent({
       type: 'progress',
@@ -256,29 +224,11 @@ export class ResumeService {
         model,
         max_tokens: MAX_PROMPT_TOKENS,
         thinking: { type: 'disabled' },
-        system: [
-          {
-            type: 'text',
-            text: 'Use the format_tailored_resume tool exactly once with the finished tailored resume. Do not add commentary.',
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
+        system,
         messages: [{ role: 'user', content: prompt }],
-        tools: [
-          {
-            name: 'format_tailored_resume',
-            description:
-              'Return the tailored resume content in the exact schema required by the app.',
-            input_schema: tailoredResumeSchema,
-            cache_control: { type: 'ephemeral' },
-          },
-        ],
-        tool_choice: {
-          type: 'tool',
-          name: 'format_tailored_resume',
-          disable_parallel_tool_use: true,
-        },
-      });
+        tools,
+        tool_choice,
+      }, { signal });
 
       onEvent({
         type: 'progress',
@@ -314,7 +264,10 @@ export class ResumeService {
       onEvent({ type: 'result', data: result });
       return result;
     } catch (error: unknown) {
-      console.error('Error in streaming resume generation:', error);
+      this.logger.error(
+          'Resume generation failed',
+          error instanceof Error ? error.stack : String(error),
+      );
       onEvent({
         type: 'error',
         data: { message: 'Internal server error during resume tailoring' },

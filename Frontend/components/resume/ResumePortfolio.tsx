@@ -13,32 +13,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useResumeStore } from '../../store/index';
 import CopyButton from '../shared/CopyButton';
 import type { LanguageCode } from '../../i18n/languages';
+import { cn } from '../../lib/cn';
+import {
+  SKILL_CATEGORIES as SHARED_CATEGORIES,
+  categorizeSkill,
+} from '../../../shared/config/skill-categories';
 
-const SKILL_CATEGORIES = [
-  { key: 'backend', label: 'Backend' },
-  { key: 'frontend', label: 'Frontend' },
-  { key: 'databases', label: 'Databases' },
-  { key: 'devops', label: 'DevOps' },
-  { key: 'cloud', label: 'Cloud' },
-  { key: 'ai', label: 'AI/LLM' },
-] as const;
-
-const CATEGORY_KEYWORDS: [string, string[]][] = [
-  ['backend', ['node','typescript','java','python','nest','express','graphql','rest','microservices','kafka','rabbit','nats','go','rust','c#','php','ruby']],
-  ['frontend', ['react','next','javascript','html','css','tailwind','redux','vue','angular','svelte','zustand']],
-  ['databases', ['postgresql','mysql','mongodb','redis','elasticsearch','sql','dynamodb','firebase','cassandra']],
-  ['devops', ['docker','kubernetes','ci/cd','github actions','gitlab','linux','observability','grafana','jenkins','terraform','ansible']],
-  ['cloud', ['aws','gcp','azure','s3','lambda','sqs','sns','cloud run','oracle cloud','digitalocean','heroku','vercel']],
-  ['ai', ['openai','langchain','llm','vector','rag','prompt','genai','claude','neural','tensorflow','pytorch']],
-];
-
-function categorizeSkill(skill: string): string {
-  const l = skill.toLowerCase();
-  for (const [cat, kws] of CATEGORY_KEYWORDS) {
-    if (kws.some((k) => l.includes(k))) return cat;
-  }
-  return 'backend';
-}
+const SKILL_CATEGORIES = SHARED_CATEGORIES.map((c) => ({ key: c.key, label: c.label }));
 
 type SkillEntry = { id: string; name: string; category: string };
 type Props = { lang: LanguageCode };
@@ -367,11 +348,11 @@ export default function ResumePortfolio({ lang }: Props) {
                             handleReorderCategory(catKey, cat.key, pos);
                           }
                         }}
-                        className={`rounded-lg p-2 -mx-2 transition-all duration-200 ${
-                          dragInsertPos?.key === cat.key
-                            ? dragInsertPos.position === 'before' ? 'pt-8' : 'pb-8'
-                            : ''
-                        }`}
+                        className={cn(
+                          'rounded-lg p-2 -mx-2 transition-all duration-200',
+                          dragInsertPos?.key === cat.key &&
+                            (dragInsertPos.position === 'before' ? 'pt-8' : 'pb-8'),
+                        )}
                       >
                         <div
                           draggable={true}

@@ -4,6 +4,9 @@ import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
 import { promisify } from 'util';
+import { normalizeUrl } from '../../../../shared/utils/url';
+import { socialIcon } from '../../../../shared/constants/social-platforms';
+import { SKILL_CATEGORIES, SkillCategory } from '../../../../shared/config/skill-categories';
 import { RenderResumeDto } from '../dto/render-resume.dto';
 
 const execFileAsync = promisify(execFile);
@@ -79,6 +82,12 @@ const filterSkillPriority = {
     'LLM pipelines',
   ],
 } as const;
+
+const KEYWORD_CATEGORIES = SKILL_CATEGORIES.flatMap((cat) =>
+  cat.keywords.map((kw) => ({ kw: kw.toLowerCase(), catKey: cat.key })),
+);
+
+const CATEGORY_MAX = new Map(SKILL_CATEGORIES.map((c) => [c.key, c.max]));
 
 @Injectable()
 export class LatexRendererService {
@@ -284,16 +293,15 @@ ${certificatesSection}
     const name = this.clean(profile.name);
     const jobTitle = this.clean(title);
 
-    const raw = (profile as any).socialLinks;
-    const socialLinkEntries = (Array.isArray(raw) ? raw : [])
-      .map((link: any) => ({
+    const socialLinkEntries = (profile.socialLinks ?? [])
+      .map((link) => ({
         icon: this.socialIcon(link.platform),
         url: this.normalizeUrl(link.url),
         label: this.clean(link.label) || this.stripProtocol(this.clean(link.url)),
       }))
-      .filter((link: { url: string; label: string }) => link.url && link.label)
+      .filter((link) => link.url && link.label)
       .map(
-        (link: { url: string; label: string; icon: string }) =>
+        (link) =>
           String.raw`\href{${this.safeUrl(link.url)}}{\raisebox{-0.2\height}${link.icon}\ \underline{${this.escape(link.label)}}}`,
       );
 
@@ -349,12 +357,12 @@ ${contacts.length ? `    \\footnotesize\n${contactLines}` : ''}
     skillGroups: ReturnType<LatexRendererService['groupSkills']>,
   ): string {
     const rows = [
-      { label: 'Backend', values: skillGroups.backend },
-      { label: 'Frontend', values: skillGroups.frontend },
-      { label: 'Databases', values: skillGroups.databases },
-      { label: 'DevOps', values: skillGroups.devops },
-      { label: 'Cloud', values: skillGroups.cloud },
-      { label: 'AI/LLM Tools', values: skillGroups.ai },
+      { label: 'Backend', values: skillGroups[SkillCategory.Backend] },
+      { label: 'Frontend', values: skillGroups[SkillCategory.Frontend] },
+      { label: 'Databases', values: skillGroups[SkillCategory.Databases] },
+      { label: 'DevOps', values: skillGroups[SkillCategory.DevOps] },
+      { label: 'Cloud', values: skillGroups[SkillCategory.Cloud] },
+      { label: 'AI/LLM Tools', values: skillGroups[SkillCategory.AI] },
     ]
       .filter((row) => row.values.length)
       .map(
@@ -518,12 +526,11 @@ ${bulletList}`;
   }
 
   private buildCertificates(dto: RenderResumeDto, profile?: RenderResumeDto['profile']): string[] {
-    const p = profile as any;
-    const profileEntries = p?.certificateEntries;
-    if (profileEntries && Array.isArray(profileEntries) && profileEntries.length) {
-      return profileEntries
-        .filter((c: any) => this.clean(c.name))
-        .map((c: any) => {
+    const certificateEntries = profile?.certificateEntries;
+    if (certificateEntries?.length) {
+      return certificateEntries
+        .filter((c) => this.clean(c.name))
+        .map((c) => {
           const parts = [this.clean(c.name), this.clean(c.issuer), this.clean(c.date)].filter(Boolean);
           return parts.join(', ');
         });
@@ -607,38 +614,31 @@ ${bulletList}`;
   }
 
   private groupSkills(skills: string[]) {
-    const categories = [
-      { key: 'backend', keywords: ['Node', 'TypeScript', 'Java', 'Python', 'Nest', 'Express', 'GraphQL', 'REST', 'Microservices', 'Kafka', 'Rabbit', 'NATS', 'Go', 'Rust', 'C#', 'PHP', 'Ruby'], max: 9 },
-      { key: 'frontend', keywords: ['React', 'Next', 'JavaScript', 'HTML', 'CSS', 'Tailwind', 'Redux', 'Vue', 'Angular', 'Svelte', 'Zustand'], max: 7 },
-      { key: 'databases', keywords: ['PostgreSQL', 'MySQL', 'MongoDB', 'Redis', 'Elasticsearch', 'SQL', 'DynamoDB', 'Firebase', 'Cassandra'], max: 7 },
-      { key: 'devops', keywords: ['Docker', 'Kubernetes', 'CI/CD', 'GitHub Actions', 'GitLab', 'Linux', 'Observability', 'Grafana', 'Jenkins', 'Terraform', 'Ansible'], max: 8 },
-      { key: 'cloud', keywords: ['AWS', 'GCP', 'Azure', 'S3', 'Lambda', 'SQS', 'SNS', 'Cloud Run', 'Oracle Cloud', 'DigitalOcean', 'Heroku', 'Vercel'], max: 8 },
-      { key: 'ai', keywords: ['OpenAI', 'LangChain', 'LLM', 'Vector', 'RAG', 'Prompt', 'GenAI', 'Claude', 'Neural', 'TensorFlow', 'PyTorch'], max: 7 },
-    ];
-
-    const assigned = new Set<number>();
-    const result: Record<string, string[]> = {
-      backend: [],
-      frontend: [],
-      databases: [],
-      devops: [],
-      cloud: [],
-      ai: [],
+    const result: Record<SkillCategory, string[]> & { other: string[] } = {
+      [SkillCategory.Backend]: [],
+      [SkillCategory.Frontend]: [],
+      [SkillCategory.Databases]: [],
+      [SkillCategory.DevOps]: [],
+      [SkillCategory.Cloud]: [],
+      [SkillCategory.AI]: [],
       other: [],
     };
 
-    for (const cat of categories) {
-      for (let i = 0; i < skills.length && result[cat.key].length < cat.max; i++) {
-        if (assigned.has(i)) continue;
-        if (cat.keywords.some((kw) => skills[i].toLowerCase().includes(kw.toLowerCase()))) {
-          result[cat.key].push(skills[i]);
-          assigned.add(i);
+    const counts = new Map<SkillCategory, number>();
+
+    for (const skill of skills) {
+      const lower = skill.toLowerCase();
+      const match = KEYWORD_CATEGORIES.find((entry) => lower.includes(entry.kw));
+      if (match) {
+        const count = counts.get(match.catKey) ?? 0;
+        const limit = CATEGORY_MAX.get(match.catKey) ?? Infinity;
+        if (count < limit) {
+          result[match.catKey].push(skill);
+          counts.set(match.catKey, count + 1);
+          continue;
         }
       }
-    }
-
-    for (let i = 0; i < skills.length; i++) {
-      if (!assigned.has(i)) result.other.push(skills[i]);
+      result.other.push(skill);
     }
 
     return result;
@@ -675,25 +675,18 @@ ${bulletList}`;
   }
 
   private normalizeUrl(value?: string): string {
-    const url = this.safeUrl(this.clean(value));
-    if (!url) return '';
-    if (/^(https?:\/\/|mailto:|tel:)/i.test(url)) return url;
-    return `https://${url}`;
+    return normalizeUrl(value);
   }
 
   private socialIcon(platform?: string): string {
-    const icons: Record<string, string> = {
+    const latexIcons: Record<string, string> = {
       linkedin: '\\faLinkedin',
       github: '\\faGithub',
-      x: '\\faTwitter',
       twitter: '\\faTwitter',
       youtube: '\\faYoutube',
       telegram: '\\faTelegram',
-      instagram: '\\faGlobe',
-      stackoverflow: '\\faGlobe',
-      website: '\\faGlobe',
-      other: '\\faGlobe',
+      globe: '\\faGlobe',
     };
-    return icons[this.clean(platform).toLowerCase()] || '\\faGlobe';
+    return latexIcons[socialIcon(platform)] || '\\faGlobe';
   }
 }

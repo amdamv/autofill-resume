@@ -1,12 +1,9 @@
 import { useState } from 'react';
+import { Plus, X } from 'lucide-react';
 import { useResumeStore } from '../../store/index';
-import {
-  Plus, X, Linkedin, Github, Globe,
-  Youtube, Twitter, MessageCircle, Camera, Code2,
-} from 'lucide-react';
 import type { LanguageCode } from '../../i18n/languages';
-
-type Props = { lang: LanguageCode };
+import { normalizeUrl } from '../../../shared/utils/url';
+import PlatformGrid, { PlatformIcon } from '../extension/PlatformGrid';
 
 const SOCIAL_PLATFORMS = [
   { id: 'linkedin', icon: 'Linkedin', label: 'LinkedIn' },
@@ -20,21 +17,7 @@ const SOCIAL_PLATFORMS = [
   { id: 'other', icon: 'Globe', label: 'Other' },
 ] as const;
 
-const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  Linkedin, Github, Globe, Youtube, Twitter, MessageCircle, Camera, Code2,
-};
-
-function PlatformIcon({ iconId, size = 14 }: { iconId: string; size?: number }) {
-  const Icon = iconMap[iconId] || Globe;
-  return <Icon size={size} />;
-}
-
-function normalizeUrl(value: string) {
-  const trimmed = value.trim();
-  if (!trimmed) return '';
-  if (/^(https?:\/\/|mailto:|tel:)/i.test(trimmed)) return trimmed;
-  return `https://${trimmed}`;
-}
+type Props = { lang: LanguageCode };
 
 export default function SocialLinksManager({ lang }: Props) {
   const socialLinks = useResumeStore((s) => s.profile.socialLinks);
@@ -79,23 +62,10 @@ export default function SocialLinksManager({ lang }: Props) {
 
       {showForm && (
         <div className="company-form">
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {SOCIAL_PLATFORMS.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setSelectedPlatform(p.id)}
-                className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] transition-all ${
-                  selectedPlatform === p.id
-                    ? 'bg-indigo-600 text-white ring-1 ring-indigo-400'
-                    : 'bg-panel text-secondary hover:text-body hover:bg-default/20'
-                }`}
-                title={p.label}
-              >
-                <PlatformIcon iconId={p.icon} />
-                {p.label}
-              </button>
-            ))}
-          </div>
+          <PlatformGrid
+            selectedPlatform={selectedPlatform}
+            onSelect={setSelectedPlatform}
+          />
           <input
             type="text"
             value={label}

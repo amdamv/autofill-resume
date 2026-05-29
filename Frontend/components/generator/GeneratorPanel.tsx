@@ -1,6 +1,7 @@
 import { useResumeStore } from '../../store/index';
 import { Sparkles, AlertCircle } from 'lucide-react';
 import type { LanguageCode } from '../../i18n/languages';
+import { cn } from '../../lib/cn';
 
 type Props = {
   lang: LanguageCode;
@@ -85,9 +86,10 @@ export default function GeneratorPanel({ lang }: Props) {
         <button
           onClick={() => generateTailoredResume(lang)}
           disabled={isGenerating}
-          className={`btn-gradient ${
-            isGenerating ? 'opacity-70 cursor-not-allowed' : ''
-          }`}
+          className={cn(
+            'btn-gradient',
+            isGenerating && 'opacity-70 cursor-not-allowed',
+          )}
         >
           {isGenerating ? (
             <>

@@ -7,26 +7,79 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { BaseSocialLinkDto } from './base-social-link.dto';
+import type { CandidateProfile } from '../../../../shared/types/profile';
 
-class PdfSocialLinkDto {
+class PdfSocialLinkDto extends BaseSocialLinkDto {
+  @IsOptional()
+  @IsString()
+  label?: string;
+}
+
+class PdfExperienceEntryDto {
+  @IsOptional()
+  @IsString()
+  company?: string;
+
+  @IsOptional()
+  @IsString()
+  position?: string;
+
+  @IsOptional()
+  @IsString()
+  dates?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  bullets?: string[];
+}
+
+class PdfEducationEntryDto {
   @IsOptional()
   @IsString()
   id?: string;
 
   @IsOptional()
   @IsString()
-  platform?: string;
+  institution?: string;
 
   @IsOptional()
   @IsString()
-  label?: string;
+  degree?: string;
 
   @IsOptional()
   @IsString()
-  url?: string;
+  field?: string;
+
+  @IsOptional()
+  @IsString()
+  dates?: string;
+
+  @IsOptional()
+  @IsString()
+  location?: string;
 }
 
-export class PdfCandidateProfileDto {
+class PdfCertificateEntryDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  issuer?: string;
+
+  @IsOptional()
+  @IsString()
+  date?: string;
+}
+
+export class PdfCandidateProfileDto implements CandidateProfile {
   @IsOptional()
   @IsString()
   name?: string;
@@ -44,19 +97,6 @@ export class PdfCandidateProfileDto {
   phone?: string;
 
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  skills?: string[];
-
-  @IsOptional()
-  @IsString()
-  experience?: string;
-
-  @IsOptional()
-  @IsString()
-  education?: string;
-
-  @IsOptional()
   @IsString()
   linkedin?: string;
 
@@ -70,18 +110,39 @@ export class PdfCandidateProfileDto {
 
   @IsOptional()
   @IsArray()
-  @IsObject({ each: true })
-  certificateEntries?: Array<{
-    name: string;
-    issuer: string;
-    date?: string;
-  }>;
+  @IsString({ each: true })
+  skills?: string[];
+
+  @IsOptional()
+  @IsString()
+  experience?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PdfExperienceEntryDto)
+  experienceEntries?: PdfExperienceEntryDto[];
+
+  @IsOptional()
+  @IsString()
+  education?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PdfEducationEntryDto)
+  educationEntries?: PdfEducationEntryDto[];
 
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PdfSocialLinkDto)
   socialLinks?: PdfSocialLinkDto[];
+
+  @IsOptional()
+  @IsArray()
+  @IsObject({ each: true })
+  certificateEntries?: PdfCertificateEntryDto[];
 }
 
 export class TailoredResumePdfDto {
@@ -125,14 +186,9 @@ export class TailoredResumePdfDto {
 
   @IsOptional()
   @IsArray()
-  @IsObject({ each: true })
-  experience?: Array<{
-    company?: string;
-    position?: string;
-    dates?: string;
-    location?: string;
-    bullets?: string[];
-  }>;
+  @ValidateNested({ each: true })
+  @Type(() => PdfExperienceEntryDto)
+  experience?: PdfExperienceEntryDto[];
 
   @IsOptional()
   @IsArray()

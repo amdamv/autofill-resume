@@ -1,6 +1,7 @@
 import { useResumeStore } from '../../store/index';
 import type { LanguageCode } from '../../i18n/languages';
 import { getTranslations } from '../../i18n/ui';
+import { FormInput, FormTextarea, FormCompactInput } from '../shared/FormField';
 
 type Props = { lang: LanguageCode };
 
@@ -8,6 +9,8 @@ export default function AutofillForm({ lang }: Props) {
   const { webFormFields, setWebFormField, clearWebForm, showFormHighlight } =
     useResumeStore();
   const ext = getTranslations(lang).extension;
+
+  const hl = (field: string) => showFormHighlight && (webFormFields as any)[field];
 
   return (
     <div
@@ -27,182 +30,94 @@ export default function AutofillForm({ lang }: Props) {
       </div>
 
       <div className="space-y-3.5 text-xs">
-        <div>
-          <label className="text-secondary font-medium block mb-1">
-            {ext.labelName}
-          </label>
-          <input
-            type="text"
-            value={webFormFields.fullName}
-            onChange={(e) => setWebFormField('fullName', e.target.value)}
-            placeholder={ext.placeholderName}
-            className={`ext-input ${
-              showFormHighlight && webFormFields.fullName
-                ? 'ext-input--highlighted'
-                : 'focus:border-indigo-500'
-            }`}
-          />
-        </div>
+        <FormInput
+          label={ext.labelName}
+          value={webFormFields.fullName}
+          onChange={(e) => setWebFormField('fullName', e.target.value)}
+          placeholder={ext.placeholderName}
+          highlight={hl('fullName')}
+        />
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-secondary font-medium block mb-1">
-              {ext.labelEmail}
-            </label>
-            <input
-              type="email"
-              value={webFormFields.email}
-              onChange={(e) => setWebFormField('email', e.target.value)}
-              placeholder={ext.placeholderEmail}
-              className={`ext-input ${
-                showFormHighlight && webFormFields.email
-                  ? 'ext-input--highlighted'
-                  : 'focus:border-indigo-500'
-              }`}
-            />
-          </div>
-          <div>
-            <label className="text-secondary font-medium block mb-1">
-              {ext.labelPhone}
-            </label>
-            <input
-              type="text"
-              value={webFormFields.phone}
-              onChange={(e) => setWebFormField('phone', e.target.value)}
-              placeholder={ext.placeholderPhone}
-              className={`ext-input ${
-                showFormHighlight && webFormFields.phone
-                  ? 'ext-input--highlighted'
-                  : 'focus:border-indigo-500'
-              }`}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="text-secondary font-medium block mb-1">
-            {ext.labelSkills}
-          </label>
-          <input
-            type="text"
-            value={webFormFields.skills}
-            onChange={(e) => setWebFormField('skills', e.target.value)}
-            placeholder={ext.placeholderSkills}
-            className={`ext-input ${
-              showFormHighlight && webFormFields.skills
-                ? 'ext-input--highlighted'
-                : 'focus:border-indigo-500'
-            }`}
+          <FormInput
+            label={ext.labelEmail}
+            type="email"
+            value={webFormFields.email}
+            onChange={(e) => setWebFormField('email', e.target.value)}
+            placeholder={ext.placeholderEmail}
+            highlight={hl('email')}
+          />
+          <FormInput
+            label={ext.labelPhone}
+            value={webFormFields.phone}
+            onChange={(e) => setWebFormField('phone', e.target.value)}
+            placeholder={ext.placeholderPhone}
+            highlight={hl('phone')}
           />
         </div>
 
+        <FormInput
+          label={ext.labelSkills}
+          value={webFormFields.skills}
+          onChange={(e) => setWebFormField('skills', e.target.value)}
+          placeholder={ext.placeholderSkills}
+          highlight={hl('skills')}
+        />
+
         <div className="ext-card">
-          <div>
-            <label className="text-secondary font-medium block mb-1 text-[11px]">
-              {ext.labelGitHub}
-            </label>
-            <input
-              type="text"
-              value={webFormFields.githubUrl}
-              onChange={(e) => setWebFormField('githubUrl', e.target.value)}
-              placeholder={ext.placeholderGitHub}
-              className={`ext-input-compact ${
-                showFormHighlight && webFormFields.githubUrl
-                  ? 'ext-input-compact--highlighted'
-                  : ''
-              }`}
-            />
-          </div>
+          <FormCompactInput
+            label={ext.labelGitHub}
+            value={webFormFields.githubUrl}
+            onChange={(e) => setWebFormField('githubUrl', e.target.value)}
+            placeholder={ext.placeholderGitHub}
+            highlight={hl('githubUrl')}
+          />
           <div className="mt-3">
-            <label className="text-secondary font-medium block mb-1 text-[11px]">
-              {ext.labelPortfolio}
-            </label>
-            <input
-              type="text"
+            <FormCompactInput
+              label={ext.labelPortfolio}
               value={webFormFields.portfolioUrl}
               onChange={(e) => setWebFormField('portfolioUrl', e.target.value)}
               placeholder={ext.placeholderPortfolio}
-              className={`ext-input-compact ${
-                showFormHighlight && webFormFields.portfolioUrl
-                  ? 'ext-input-compact--highlighted'
-                  : ''
-              }`}
+              highlight={hl('portfolioUrl')}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-secondary font-medium block mb-1">
-              {ext.labelSalary}
-            </label>
-            <input
-              type="text"
-              value={webFormFields.expectedSalary}
-              onChange={(e) =>
-                setWebFormField('expectedSalary', e.target.value)
-              }
-              placeholder={ext.placeholderSalary}
-              className={`ext-input ${
-                showFormHighlight && webFormFields.expectedSalary
-                  ? 'ext-input--highlighted'
-                  : 'focus:border-indigo-500'
-              }`}
-            />
-          </div>
-          <div>
-            <label className="text-secondary font-medium block mb-1">
-              {ext.labelStartDate}
-            </label>
-            <input
-              type="text"
-              value={webFormFields.customNotice}
-              onChange={(e) =>
-                setWebFormField('customNotice', e.target.value)
-              }
-              placeholder={ext.placeholderStartDate}
-              className={`ext-input ${
-                showFormHighlight && webFormFields.customNotice
-                  ? 'ext-input--highlighted'
-                  : 'focus:border-indigo-500'
-              }`}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="text-secondary font-medium block mb-1">
-            {ext.labelAchievements}
-          </label>
-          <textarea
-            value={webFormFields.achievements}
-            onChange={(e) => setWebFormField('achievements', e.target.value)}
-            placeholder={ext.placeholderAchievements}
-            rows={3}
-            className={`ext-input text-xs font-sans resize-none ${
-              showFormHighlight && webFormFields.achievements
-                ? 'ext-input--highlighted font-mono text-[11px]'
-                : 'focus:border-indigo-500'
-            }`}
+          <FormInput
+            label={ext.labelSalary}
+            value={webFormFields.expectedSalary}
+            onChange={(e) => setWebFormField('expectedSalary', e.target.value)}
+            placeholder={ext.placeholderSalary}
+            highlight={hl('expectedSalary')}
+          />
+          <FormInput
+            label={ext.labelStartDate}
+            value={webFormFields.customNotice}
+            onChange={(e) => setWebFormField('customNotice', e.target.value)}
+            placeholder={ext.placeholderStartDate}
+            highlight={hl('customNotice')}
           />
         </div>
 
-        <div>
-          <label className="text-secondary font-medium block mb-1 text-indigo-400">
-            {ext.labelCoverLetter}
-          </label>
-          <textarea
-            value={webFormFields.coverLetter}
-            onChange={(e) => setWebFormField('coverLetter', e.target.value)}
-            placeholder={ext.placeholderCoverLetter}
-            rows={3}
-            className={`ext-input resize-none ${
-              showFormHighlight && webFormFields.coverLetter
-                ? 'ext-input--highlighted'
-                : 'focus:border-indigo-500'
-            }`}
-          />
-        </div>
+        <FormTextarea
+          label={ext.labelAchievements}
+          value={webFormFields.achievements}
+          onChange={(e) => setWebFormField('achievements', e.target.value)}
+          placeholder={ext.placeholderAchievements}
+          rows={3}
+          highlight={hl('achievements')}
+        />
+
+        <FormTextarea
+          label={ext.labelCoverLetter}
+          value={webFormFields.coverLetter}
+          onChange={(e) => setWebFormField('coverLetter', e.target.value)}
+          placeholder={ext.placeholderCoverLetter}
+          rows={3}
+          highlight={hl('coverLetter')}
+          labelClassName="text-indigo-400"
+        />
       </div>
     </div>
   );
